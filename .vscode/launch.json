@@ -1,0 +1,106 @@
+{
+    "configurations": [
+        // RUN all files========================================================
+        {
+            "name": "CPP run all",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "externalConsole": true,
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "preLaunchTask": "CPP run all files"
+        },
+        {
+            "name": "CPP debug all",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CPP debug all files"
+        },
+        // RUN one file ========================================================
+        {
+            "name": "CPP run one file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "externalConsole": true,
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "preLaunchTask": "CPP run one file"
+        },
+        {
+            "name": "CPP debug one file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "CPP debug one file"
+        },
+        {
+            "name": "C run",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "externalConsole": true,
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "preLaunchTask": "C run"
+        },
+        {
+            "name": "C debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${fileDirname}/${fileBasenameNoExtension}",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "C debug"
+        }
+    ],
+    "version": "2.0.0"
+}

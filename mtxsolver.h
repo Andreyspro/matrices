@@ -1,0 +1,31 @@
+#ifndef MTXSOLVER_H
+#define MTXSOLVER_H
+
+#include <vector>
+#include <string>
+
+
+typedef double MtxElement;
+typedef std::vector<MtxElement> MtxLine;
+
+class MtxSolver {
+public:
+	MtxSolver();
+	MtxSolver(const MtxSolver& right); // move constructor 
+	MtxSolver(MtxSolver&& right); // move constructor 
+	const MtxSolver& operator=(const MtxSolver&);
+	const MtxSolver& operator=(MtxSolver&&);
+	void LoadFromFile(const std::string &FileName);
+	size_t getSize() const;
+	MtxElement getAnswers(size_t index) const;
+	void Solve();
+	void saveAnswers(const std::string& AnswersFileName);
+private:
+	bool isSolved;
+	size_t size;
+	std::vector<MtxLine> Mtx;
+	std::vector<MtxElement> Answers;
+	std::string MtxFileName;
+};
+
+#endif
