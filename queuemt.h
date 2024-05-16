@@ -21,6 +21,9 @@ public:
 	// bool wait_and_push(const T& new_value);
 	// bool wait_and_push(T&& new_value);
 	bool try_pop(T &value);
+	bool empty();
+	size_t size();
+	void free();
 };
 
 template <typename T>
@@ -39,16 +42,16 @@ template <typename T>
 bool queuemt<T>::try_push(const T &new_value)
 {
 	std::lock_guard<std::mutex> lk_guard(queue_mutex);
-	std::cout << "Begin push by ref - " << new_value << std::endl;
+	// std::cout << "Queuemt. Begin push by ref - " << new_value << std::endl;
 	if (maxsize == 0 || data_queue.size() < maxsize)
 	{
 		data_queue.push(new_value);
-		std::cout << "End push by ref." << std::endl;
+		// std::cout << "Queuemt. End push by ref." << std::endl;
 		return true;
 	}
 	else
 	{
-		std::cout << "Queue is full !" << std::endl;
+		// std::cout << "Queuemt. Queue is full !" << std::endl;
 		return false;
 	}
 }
@@ -57,16 +60,16 @@ template <typename T>
 bool queuemt<T>::try_push(T &&new_value)
 {
 	std::lock_guard<std::mutex> lk_guard(queue_mutex);
-	std::cout << "Begin push by rvalue - " << new_value << std::endl;
+	// std::cout << "Queuemt. Begin push by rvalue - " << new_value << std::endl;
 	if (maxsize == 0 || data_queue.size() < maxsize)
 	{
 		data_queue.push(std::move(new_value));
-		std::cout << "End push by rvalue." << std::endl;
+		// std::cout << "Queuemt. End push by rvalue." << std::endl;
 		return true;
 	}
 	else
 	{
-		std::cout << "Queue is full !" << std::endl;
+		// std::cout << "Queuemt. Queue is full !" << std::endl;
 		return false;
 	}
 }
@@ -87,6 +90,26 @@ bool queuemt<T>::try_pop(T &value)
 		return true;
 	}
 	return false;
+}
+
+template <typename T>
+bool queuemt<T>::empty()
+{
+	std::lock_guard<std::mutex> lk_guard(queue_mutex);
+	return data_queue.empty();
+}
+
+template <typename T>
+size_t queuemt<T>::size()
+{
+	std::lock_guard<std::mutex> lk_guard(queue_mutex);
+	return data_queue.size();
+}
+
+template<typename T>
+void queuemt<T>::free()
+{
+	return;
 }
 
 #endif

@@ -17,7 +17,7 @@ MtxSolver::MtxSolver() // default constructor
 MtxSolver::MtxSolver(const MtxSolver &copy) // copy constructor
 	: isSolved(copy.isSolved), size(copy.size)
 {
-	std::cout << "MtxSolver start copy constructor ======n";
+	std::cout << "MtxSolver start copy constructor ====== \n";
 	MtxFileName = copy.MtxFileName;
 	Mtx = copy.Mtx;
 	Answers = copy.Answers;
@@ -34,9 +34,14 @@ MtxSolver::MtxSolver(MtxSolver &&right) // move constructor
 	std::cout << "MtxSolver end move constructor.\n";
 }
 
+MtxSolver::~MtxSolver()
+{
+	std::cout << "MtxSolver destructor.\n";
+}
+
 const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 {
-	std::cout << "MtxSolver start copy assign ======.\n";
+	 std::cout << "MtxSolver start copy assign ======.\n";
 	if (&copy != this)
 	{
 		isSolved = copy.isSolved;
@@ -45,15 +50,15 @@ const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 		Mtx = copy.Mtx;
 		Answers = copy.Answers;
 	}
-	else
-		std::cout << "Attempt self assing !\n";
+	// else
+		// std::cout << "Attempt self assing !\n";
 	return *this;
-	std::cout << "MtxSolver end copy assign.\n";
+	// std::cout << "MtxSolver end copy assign.\n";
 }
 
 const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 {
-	std::cout << "MtxSolver start movw assign ======.\n";
+	 std::cout << "MtxSolver start move assign ======.\n";
 	if (&right != this)
 	{
 		isSolved = right.isSolved;
@@ -62,10 +67,10 @@ const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 		Mtx = std::move(right.Mtx);
 		Answers = std::move(right.Answers);
 	}
-	else
-		std::cout << "Attempt self assing !\n";
+	// else
+		// std::cout << "MtxSolver. Attempt self assing !\n";
 	return *this;
-	std::cout << "MtxSolver end move assign.\n";
+	// std::cout << "MtxSolver end move assign.\n";
 }
 
 void MtxSolver::LoadFromFile(const std::string &FileName)
@@ -73,9 +78,9 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 	std::ifstream mtxFile(FileName.c_str(), std::ios::in);
 	if (!mtxFile)
 	{
-		throw std::runtime_error("Cant open file '" + FileName + "'");
+		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
-	Mtx.clear();
+	// Mtx.clear();
 	mtxFile >> size;
 	Mtx.resize(size);
 
@@ -98,12 +103,12 @@ size_t MtxSolver::getSize() const
 MtxElement MtxSolver::getAnswers(size_t index) const
 {
 	if (!isSolved)
-		throw std::runtime_error("Matrix not solved.");
+		throw std::runtime_error("MtxSolver. Matrix not solved.");
 
 	if (index > Answers.size())
 	{
 		std::stringstream ErrorString;
-		ErrorString << "Index error " << index << ".";
+		ErrorString << "MtxSolver. Index error " << index << ".";
 		throw std::runtime_error(ErrorString.str());
 	}
 	return Answers[index];
@@ -141,13 +146,13 @@ void MtxSolver::Solve()
 void MtxSolver::saveAnswers(const std::string &AnswersFileNameStr)
 {
 	if (!isSolved || size == 0)
-		throw std::runtime_error("Error: Matrix not solved!");
+		throw std::runtime_error("MtxSolver. Error: Matrix not solved!");
 	fs::path MtxFilenamePath(AnswersFileNameStr);
 	fs::create_directories(MtxFilenamePath.parent_path());
 	std::ofstream AnswersFile(MtxFilenamePath.string().c_str(), std::ios::out);
 	if (!AnswersFile)
 	{
-		throw std::runtime_error("Error: Can't write to file: " + AnswersFileNameStr);
+		throw std::runtime_error("MtxSolver. Error: Can't write to file: " + AnswersFileNameStr);
 	}
 	else
 	{
@@ -155,4 +160,17 @@ void MtxSolver::saveAnswers(const std::string &AnswersFileNameStr)
 			AnswersFile << Answers[i] << "\n";
 		AnswersFile.close();
 	}
+}
+
+void MtxSolver::free()
+{
+	std::cout << "MtxSolver free. '" << MtxFileName << "'\n";
+	Mtx.clear();
+	Mtx.shrink_to_fit();
+}
+
+std::ostream &operator<<(std::ostream &output, const MtxSolver &Mtx)
+{
+	output << fs::path(Mtx.MtxFileName).filename();
+	return output;
 }

@@ -13,7 +13,7 @@
         "-O2",
         "${fileDirname}/*.cpp",
         "-o",
-        "${fileDirname}/${fileBasenameNoExtension}",
+        "${fileDirname}/bin/${fileBasenameNoExtension}",
         "-lboost_filesystem",
         "-lpthread"
         //"-Wl,-Bdynamic", "-lboost_filesystem",
@@ -40,98 +40,9 @@
         "-g",
         "${fileDirname}/*.cpp",
         "-o",
-        "${fileDirname}/${fileBasenameNoExtension}",
+        "${fileDirname}/bin/${fileBasenameNoExtension}",
         "-lboost_filesystem",
         "-lpthread"
-      ],
-      "options": {
-        "cwd": "${fileDirname}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "Build file in directory with Debug"
-    },
-    //One file ==============================================================================
-    {
-      "type": "cppbuild",
-      "label": "CPP run one file",
-      "command": "g++",
-      "args": [
-        "-Wall",
-        "${file}",
-        "-O2",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}",
-      ],
-      "options": {
-        "cwd": "${fileDirname}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "Build file in directory"
-    },
-    {
-      "type": "cppbuild",
-      "label": "CPP debug one file",
-      "command": "g++",
-      "args": [
-        "-Wall",
-        "-std=c++11",
-        "-g",
-        "${file}",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
-        //"-lboost_filesystem"
-      ],
-      "options": {
-        "cwd": "${fileDirname}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "Build file in directory with Debug"
-    },
-    {
-      "type": "cppbuild",
-      "label": "C run",
-      "command": "gcc",
-      "args": [
-        "${fileDirname}/*.c",
-        "-Wall",
-        "-O2",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
-      ],
-      "options": {
-        "cwd": "${fileDirname}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "Build file in directory"
-    },
-    {
-      "type": "cppbuild",
-      "label": "C debug",
-      "command": "gcc",
-      "args": [
-        "-Wall",
-        "-fdiagnostics-color=always",
-
-        "-g",
-        "${fileDirname}/*.c",
-        "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
       ],
       "options": {
         "cwd": "${fileDirname}"
