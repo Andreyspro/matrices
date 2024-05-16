@@ -1,3 +1,5 @@
+#define EXTRAOUT
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -11,37 +13,51 @@ namespace fs = boost::filesystem;
 MtxSolver::MtxSolver() // default constructor
 	: isSolved(false), size(0)
 {
-	std::cout << "MtxSolver default constructor ======\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver default constructor ======\n";
+	#endif
 }
 
 MtxSolver::MtxSolver(const MtxSolver &copy) // copy constructor
 	: isSolved(copy.isSolved), size(copy.size)
 {
-	std::cout << "MtxSolver start copy constructor ====== \n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver start copy constructor ====== \n";
+	#endif
 	MtxFileName = copy.MtxFileName;
 	Mtx = copy.Mtx;
 	Answers = copy.Answers;
-	std::cout << "MtxSolver end copy constructor.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver end copy constructor.\n";
+	#endif
 }
 
 MtxSolver::MtxSolver(MtxSolver &&right) // move constructor
 	: isSolved(right.isSolved), size(right.size)
 {
-	std::cout << "MtxSolver start move constructor ======\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver start move constructor ======\n";
+	#endif
 	MtxFileName = std::move(right.MtxFileName);
 	Mtx = std::move(right.Mtx);
 	Answers = std::move(right.Answers);
-	std::cout << "MtxSolver end move constructor.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver end move constructor.\n";
+	#endif
 }
 
 MtxSolver::~MtxSolver()
 {
-	std::cout << "MtxSolver destructor.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver destructor.\n";
+	#endif
 }
 
 const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 {
-	 std::cout << "MtxSolver start copy assign ======.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver start copy assign ======.\n";
+	#endif
 	if (&copy != this)
 	{
 		isSolved = copy.isSolved;
@@ -53,12 +69,16 @@ const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 	// else
 		// std::cout << "Attempt self assing !\n";
 	return *this;
-	// std::cout << "MtxSolver end copy assign.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver end copy assign.\n";
+	#endif
 }
 
 const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 {
-	 std::cout << "MtxSolver start move assign ======.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver start move assign ======.\n";
+	#endif
 	if (&right != this)
 	{
 		isSolved = right.isSolved;
@@ -70,7 +90,9 @@ const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 	// else
 		// std::cout << "MtxSolver. Attempt self assing !\n";
 	return *this;
-	// std::cout << "MtxSolver end move assign.\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver end move assign.\n";
+	#endif
 }
 
 void MtxSolver::LoadFromFile(const std::string &FileName)
@@ -164,7 +186,9 @@ void MtxSolver::saveAnswers(const std::string &AnswersFileNameStr)
 
 void MtxSolver::free()
 {
-	std::cout << "MtxSolver free. '" << MtxFileName << "'\n";
+	#ifdef EXTRAOUT
+		std::cout << "MtxSolver free. '" << MtxFileName << "'\n";
+	#endif
 	Mtx.clear();
 	Mtx.shrink_to_fit();
 }
