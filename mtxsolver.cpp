@@ -1,4 +1,4 @@
-#define EXTRAOUT
+#undef EXTRAOUT
 
 #include <fstream>
 #include <iostream>
@@ -102,17 +102,19 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 	{
 		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
-	// Mtx.clear();
 	mtxFile >> size;
 	Mtx.resize(size);
-
 	for (size_t i = 0; i < size; i++)
 	{
-		Mtx[i].resize(size + 1);
+		// Mtx[i].resize(size + 1);
+		// Mtx.push_back(MtxLine(size + 1));
+		MtxLine TempLine(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			mtxFile >> Mtx[i][j];
+			// mtxFile >> Mtx[i][j];
+			mtxFile >> TempLine[j];
 		}
+		Mtx[i] = std::move(TempLine);
 	}
 	MtxFileName = FileName;
 }
@@ -148,6 +150,7 @@ void MtxSolver::Solve()
 		if (divisor != 1)
 			for (size_t j = i; j < size + 1; j++)
 				Mtx[i][j] /= divisor;
+				// Mtx[i][j] = Mtx[i][j] / divisor;
 
 		for (size_t i2 = 0; i2 < size; i2++)
 			if (i2 != i)
@@ -155,6 +158,7 @@ void MtxSolver::Solve()
 				multiplier = Mtx[i2][i];
 				for (size_t j2 = 0; j2 < size + 1; j2++)
 					Mtx[i2][j2] -= Mtx[i][j2] * multiplier;
+					// Mtx[i2][j2] = Mtx[i2][j2] - (Mtx[i][j2] * multiplier);
 			}
 	}
 	Answers.resize(size);

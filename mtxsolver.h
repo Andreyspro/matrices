@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <string>
+#include "mtxline.h"
 
-
-typedef double MtxElement;
-typedef std::vector<MtxElement> MtxLine;
+// typedef double MtxElement;
+// typedef std::vector<MtxElement> MtxLine;
 
 class MtxSolver {
 	friend std::ostream &operator<<(std::ostream &, const MtxSolver &);

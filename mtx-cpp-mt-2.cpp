@@ -17,8 +17,8 @@
 #include <atomic>
 
 namespace fs = boost::filesystem;
-const unsigned int MAX_PREFETCH_MTX = 6;
-const unsigned int MAX_LOAD_THREADS = 4;
+const unsigned int MAX_PREFETCH_MTX = 1;
+const unsigned int MAX_LOAD_THREADS = 1;
 const unsigned int MAX_CALC_THREADS = 4;
 std::string mtxPath{"/home/andreys/mtxs/"};
 std::atomic<bool> mtx_is_loaded;
@@ -101,13 +101,60 @@ bool calcMatrix(queuemt<MtxSolver>& MtxQueueToSolve, queuemt<MtxSolver>& MtxQueu
 	return true;
 }
 
+void test1()
+{
+
+	std::cout << "Test1 begin. \n";
+	// MtxSolver M;
+	// M.LoadFromFile("/home/andreys/mtxs/matrix-3.5238bc.mtx");
+	// std::cout << "Load  ok. \n";
+	// M.Solve();
+	std::vector<MtxLine> v;
+	v.push_back(MtxLine(2000));
+	for (size_t i = 0; i < 2000; i++)
+	{
+		v[0][i] = 10.15*i;
+	}
+	
+	for (size_t i = 0; i < 2000; i++)
+	{
+		std::cout << v[0][i] << "\n";
+	}
+	
+	std::cout << "Test1 end. \n";
+
+}
+
+void test2()
+{
+
+	std::cout << "Test2 begin. \n";
+	MtxSolver M;
+	M.LoadFromFile("/home/andreys/mtxs/matrix-1000.72c916.mtx");
+	std::cout << "Load  ok. \n";
+	auto beginTime = std::chrono::steady_clock::now();
+	M.Solve();
+	auto endTime = std::chrono::steady_clock::now();
+	auto workTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - beginTime);
+	std::cout << "Load + Calc time - "
+	<< std::fixed << std::setprecision(2)
+		<< workTime.count()
+		<< " milliseconds.\n";
+
+	M.saveAnswers("./answers/test2-orig.txt");
+	std::cout << "Test2 end. \n";
+
+}
+
 int main(int argc, char *argv[])
 {
-	std::cout << "Main begin. \n";
+
+	
 	#ifdef EXTRAOUT
 		std::cout << "Debug mode is ON \n";
 	#endif
-
+	test2();
+/*
 	// RUN UID
 	boost::uuids::random_generator gen;
 	std::string runUID = boost::uuids::to_string(gen()).substr(0, 6);
@@ -165,8 +212,8 @@ int main(int argc, char *argv[])
 
 	std::cout << "To solve queue size -" << mtx_queue_to_solve.size() <<  "\n";
 	std::cout << "Solved matrices size -" << mtx_queue_solved.size() <<  "\n";
+*/
 	std::cout << "Main end. \n";
-	
 	std::cin.get();
 
 	return 0;
