@@ -18,8 +18,11 @@ Short history:
 
 
 What next:
+- CMake
+- View library static linkage of dynamic, and distributing way hims.
 - Develop network client server application: Solver-Client read file, send data to Solver-Server. Server calculate matrix and send answer back to Client;
 - may be use SSE and another SIMD instructions.
 - Port application to another device, may be Mikrotik router or ARM computer :)
 - Refactoring for more performance
 - Refactoring code for estetic view.
+- Build deb or rpm package.
