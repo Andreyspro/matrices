@@ -66,8 +66,8 @@ const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 		Mtx = copy.Mtx;
 		Answers = copy.Answers;
 	}
-	// else
-		// std::cout << "Attempt self assing !\n";
+	else
+		std::cout << "Attempt self assing !\n";
 	return *this;
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver end copy assign.\n";
@@ -87,8 +87,8 @@ const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 		Mtx = std::move(right.Mtx);
 		Answers = std::move(right.Answers);
 	}
-	// else
-		// std::cout << "MtxSolver. Attempt self assing !\n";
+	else
+		std::cout << "MtxSolver. Attempt self assing !\n";
 	return *this;
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver end move assign.\n";
@@ -103,18 +103,18 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
 	mtxFile >> size;
-	Mtx.resize(size);
+	Mtx.reserve(size);
 	for (size_t i = 0; i < size; i++)
 	{
 		// Mtx[i].resize(size + 1);
 		// Mtx.push_back(MtxLine(size + 1));
-		MtxLine TempLine(size + 1);
+		Mtx.emplace_back(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			// mtxFile >> Mtx[i][j];
-			mtxFile >> TempLine[j];
+			mtxFile >> Mtx[i][j];
+			// mtxFile >> TempLine[j];
 		}
-		Mtx[i] = std::move(TempLine);
+		// Mtx[i] = std::move(TempLine);
 	}
 	MtxFileName = FileName;
 }
@@ -147,18 +147,22 @@ void MtxSolver::Solve()
 	{
 
 		divisor = Mtx[i][i];
+		// divisor = Mtx[i].Data[i];
 		if (divisor != 1)
 			for (size_t j = i; j < size + 1; j++)
 				Mtx[i][j] /= divisor;
-				// Mtx[i][j] = Mtx[i][j] / divisor;
+				// Mtx[i].Data[j] /= divisor;
 
 		for (size_t i2 = 0; i2 < size; i2++)
 			if (i2 != i)
 			{
 				multiplier = Mtx[i2][i];
+				// multiplier = Mtx[i2].Data[i];
 				for (size_t j2 = 0; j2 < size + 1; j2++)
+					// Mtx[i2].Data[j2] -= Mtx[i].Data[j2] * multiplier;
 					Mtx[i2][j2] -= Mtx[i][j2] * multiplier;
-					// Mtx[i2][j2] = Mtx[i2][j2] - (Mtx[i][j2] * multiplier);
+					// Mtx[i2][j2] = Mtx[i2][j2] - Mtx[i][j2] * multiplier;
+
 			}
 	}
 	Answers.resize(size);
