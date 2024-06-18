@@ -1,4 +1,4 @@
-Pet project for learn programming with C++ using.
+My Pet project for learn programming with C++ using.
 Additionally pratctice in GIT.
 
 Goals:
