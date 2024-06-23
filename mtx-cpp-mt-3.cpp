@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 #include <chrono>
+#include <atomic>
 
 #include "boost/filesystem.hpp"
 #include <boost/uuid/random_generator.hpp>
@@ -13,7 +14,7 @@
 
 #include "mtxsolver.h"
 #include "queuemt.h"
-#include <atomic>
+#include "perf_timer.h"
 
 namespace fs = boost::filesystem;
 std::string mtxPath{"/home/andreys/mtxs/"};
@@ -25,8 +26,6 @@ std::atomic<unsigned> calculated_mtx(0);
 std::atomic<unsigned> full_queue_condition(0);
 std::atomic<unsigned> load_time(0);
 std::atomic<unsigned> calc_time(0);
-std::atomic<unsigned> loaded_push_time(0);
-std::atomic<unsigned> calc_pop_time(0);
 std::atomic<unsigned> prefetched_mtx_max_count(0);
 
 size_t max_load_queue_size = 0;
@@ -47,17 +46,15 @@ bool loadMatrix(queuemt<fs::path>& MtxQueueFiles, queuemt<MtxSolver>& MtxQueueTo
 		if (verbosity >= 2)
 			std::cout << std::this_thread::get_id() 
 				<< ". Start load matrix #" << count << "  -> " << path.filename().string() << " < ++++++ \n";
-		auto beginTime = std::chrono::steady_clock::now();
+		perf_timer<std::chrono::milliseconds> load_timer1;
 		Mtx.LoadFromFile(path.string());
+		load_timer1.stop();
 		++loaded_mtx;
-		auto endTime = std::chrono::steady_clock::now();
-		auto workTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - beginTime);
-		load_time += workTime.count();
+		load_time += load_timer1.get_duration();
 		if (verbosity >= 2) {
-			std::cout << std::this_thread::get_id() << ". Load time \""
+			std::cout << std::this_thread::get_id() << "End load. Load time \""
 				<< path.filename().string()	<< "\" - "
-				<< std::fixed << std::setprecision(2) 
-				<< workTime.count() << " milliseconds.\n";
+				<< load_timer1 << " milliseconds.\n";
 		}
 
 		// while (!MtxQueueToSolve.try_push(std::move(Mtx)))
@@ -67,15 +64,11 @@ bool loadMatrix(queuemt<fs::path>& MtxQueueFiles, queuemt<MtxSolver>& MtxQueueTo
 		// 	++full_queue_condition;
 		// 	std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_TIME));
 		// }
-		auto load_push_begintime = std::chrono::steady_clock::now();
 		if (!MtxQueueToSolve.wait_and_push(std::move(Mtx))) {
 			std::cout << std::this_thread::get_id() << ". Error while put " << path.filename().string() << " in the queuemt. \n";
 		}
 		if (verbosity >= 1)
 			std::cout << "Loader. Preload MTX size - " << MtxQueueToSolve.size() << "\n";
-		auto load_push_endTime = std::chrono::steady_clock::now();
-		auto load_push_worktime = std::chrono::duration_cast<std::chrono::microseconds>(load_push_endTime - load_push_begintime);
-		loaded_push_time += load_push_worktime.count();
 		if (verbosity >= 2)
 			std::cout << std::this_thread::get_id() << ". End put " << path.filename().string() << " in the queuemt. \n";
 	}
@@ -87,37 +80,27 @@ bool calcMatrix(queuemt<MtxSolver>& MtxQueueToSolve, queuemt<MtxSolver>& MtxQueu
 {
 	MtxSolver temp_mtx;
 	std::cout << std::this_thread::get_id() << ". Start CALC thread.\n";
-	std::chrono::steady_clock::time_point calc_pop_start, calc_pop_end;
-	calc_pop_start = std::chrono::steady_clock::now();
 	while (MtxQueueToSolve.wait_and_pop(temp_mtx))
 	{
 		if (verbosity >= 1)
 			std::cout << "Calc. Preload MTX size - " << MtxQueueToSolve.size() << "\n";
 
-		calc_pop_end = std::chrono::steady_clock::now();
-		auto pt = std::chrono::duration_cast<std::chrono::microseconds>(calc_pop_end - calc_pop_start);
-		calc_pop_time += pt.count();
 		if (verbosity >= 2)
-			std::cout << std::this_thread::get_id() << ". Start calc " << temp_mtx << " <MMMMMMMMMMMM\n";
-		auto beginTime = std::chrono::steady_clock::now();
+			std::cout << std::this_thread::get_id() << ". Start calc " << temp_mtx << "...\n";
+		perf_timer<std::chrono::milliseconds> calc_timer1;
 		temp_mtx.Solve();
-		auto endTime = std::chrono::steady_clock::now();
-		auto workTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - beginTime);
-		calc_time += workTime.count();
+		calc_timer1.stop();
+		calc_time += calc_timer1.get_duration();
 		temp_mtx.free();
 		++calculated_mtx;
 		if (verbosity >= 2) 
 		{
-			std::cout << std::this_thread::get_id() << ". Calc time \""	<< temp_mtx << "\" - "
-				<< std::fixed << std::setprecision(2)
-				<< workTime.count()
-				<< " milliseconds.\n";
-			std::cout << std::this_thread::get_id() << ". End calc " << temp_mtx << "\n";
+			std::cout << std::this_thread::get_id() << "End calc. Calc time \""	<< temp_mtx << "\" - "
+				<< calc_timer1 << " milliseconds.\n";
 		}
 
 		MtxQueueSolved.try_push(std::move(temp_mtx));
 
-		calc_pop_start = std::chrono::steady_clock::now();
 	}
 		
 		// if (MtxQueueToSolve.try_pop(temp_mtx))
@@ -183,8 +166,6 @@ int main(int argc, char *argv[])
 	#ifdef EXTRAOUT
 		std::cout << "Debug mode is ON \n";
 	#endif
-	// test2();
-	// std::cout << "Out from test# \n";
 
 	// RUN UID
 	boost::uuids::random_generator gen;
@@ -210,7 +191,7 @@ int main(int argc, char *argv[])
 	queuemt<MtxSolver> mtx_queue_solved;
 	std::vector<std::thread> loadThreads;
 	std::vector<std::thread> calcThreads;
-	auto beginTime = std::chrono::steady_clock::now();
+	perf_timer<std::chrono::milliseconds> timer1;
 	// Start load threads.
 	for (size_t i = 0; i < MAX_LOAD_THREADS; i++)
 	{
@@ -236,11 +217,9 @@ int main(int argc, char *argv[])
 		calcThread.join();
 	}
 	
-	auto endTime = std::chrono::steady_clock::now();
-	auto workTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - beginTime);
+	timer1.stop();
 	std::cout << "Load + Calc time - " << std::fixed << std::setprecision(2)
-		<< workTime.count()
-		<< " milliseconds.\n";
+		<< timer1 << " milliseconds.\n";
 
 	std::cout << "To solve queue size -" << mtx_queue_to_solve.size() << "\n";
 	std::cout << "Solved matrices size -" << mtx_queue_solved.size() << "\n";
@@ -248,9 +227,7 @@ int main(int argc, char *argv[])
 		<< loaded_mtx << "/" << calculated_mtx << "\n";
 	std::cout << "Full queue condition -" << full_queue_condition << "\n";
 	std::cout << "Load time - " << load_time << "\n";
-	std::cout << "Load push time - " << loaded_push_time << "uSecs\n";
 	std::cout << "Calc time -" << calc_time << "\n";
-	std::cout << "Calc pop time -" << calc_pop_time << " uSecs\n";
 
 	std::cout << "Main end. \n";
 	std::cin.get();
