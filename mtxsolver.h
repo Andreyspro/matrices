@@ -17,6 +17,7 @@ public:
 	const MtxSolver& operator=(const MtxSolver&);
 	const MtxSolver& operator=(MtxSolver&&);
 	void LoadFromFile(const std::string &FileName);
+	void LoadFromStream(std::istream &mtxstream);
 	size_t getSize() const;
 	MtxElement getAnswers(size_t index) const;
 	void Solve();

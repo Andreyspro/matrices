@@ -102,21 +102,22 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 	{
 		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
-	mtxFile >> size;
+	LoadFromStream(mtxFile);
+	MtxFileName = FileName;
+}
+
+void MtxSolver::LoadFromStream(std::istream &mtxstream)
+{
+	mtxstream >> size;
 	Mtx.reserve(size);
 	for (size_t i = 0; i < size; i++)
 	{
-		// Mtx[i].resize(size + 1);
-		// Mtx.push_back(MtxLine(size + 1));
 		Mtx.emplace_back(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			mtxFile >> Mtx[i][j];
-			// mtxFile >> TempLine[j];
+			mtxstream >> Mtx[i][j];
 		}
-		// Mtx[i] = std::move(TempLine);
 	}
-	MtxFileName = FileName;
 }
 
 size_t MtxSolver::getSize() const
