@@ -47,7 +47,13 @@ bool loadMatrix(queuemt<fs::path>& MtxQueueFiles, queuemt<MtxSolver>& MtxQueueTo
 			std::cout << std::this_thread::get_id() 
 				<< ". Start load matrix #" << count << "  -> " << path.filename().string() << " < ++++++ \n";
 		perf_timer<std::chrono::milliseconds> load_timer1;
-		Mtx.LoadFromFile(path.string());
+		try {
+			Mtx.LoadFromFile(path.string());
+		} catch (std::runtime_error& ex) {
+			std::cout << "Error - " << ex.what() << "\n";
+			exit(1);
+		}
+
 		load_timer1.stop();
 		++loaded_mtx;
 		load_time += load_timer1.get_duration();

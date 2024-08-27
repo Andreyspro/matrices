@@ -11,7 +11,7 @@
 namespace fs = boost::filesystem;
 
 MtxSolver::MtxSolver() // default constructor
-	: isSolved(false), size(0)
+	: isSolved(false), size(0), data_header(supported_mtx_data_header)
 {
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver default constructor ======\n";
@@ -106,16 +106,34 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 	MtxFileName = FileName;
 }
 
-void MtxSolver::LoadFromStream(std::istream &mtxstream)
+void MtxSolver::LoadFromStream(std::istream &imtxstream)
 {
-	mtxstream >> size;
+	std::string cur_type, cur_version, cur_subversion;
+
+	std::getline(imtxstream, cur_type);
+	if (cur_type != supported_mtx_data_header.type)
+		throw std::runtime_error("Current file type not supported. Incorrect type");
+	
+	std::getline(imtxstream, cur_version);
+	if (supported_mtx_data_header.version != std::stoi(cur_version))
+		throw std::runtime_error("Current file type not supported. Incorrect version");
+	
+	std::getline(imtxstream, cur_subversion);
+	if (supported_mtx_data_header.subversion != std::stoi(cur_subversion))
+		throw std::runtime_error("Current file type not supported. Incorrect subversion");
+	
+	cur_type.copy(data_header.type, sizeof(data_header.type));
+	data_header.version = std::stoi(cur_subversion);
+	data_header.subversion = std::stoi(cur_subversion);
+
+	imtxstream >> size;
 	Mtx.reserve(size);
 	for (size_t i = 0; i < size; i++)
 	{
 		Mtx.emplace_back(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			mtxstream >> Mtx[i][j];
+			imtxstream >> Mtx[i][j];
 		}
 	}
 }
