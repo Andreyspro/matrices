@@ -123,7 +123,7 @@ void MtxSolver::LoadFromStream(std::istream &imtxstream)
 		throw std::runtime_error("Current file type not supported. Incorrect subversion");
 	
 	cur_type.copy(data_header.type, sizeof(data_header.type));
-	data_header.version = std::stoi(cur_subversion);
+	data_header.version = std::stoi(cur_version);
 	data_header.subversion = std::stoi(cur_subversion);
 
 	imtxstream >> size;
@@ -137,6 +137,35 @@ void MtxSolver::LoadFromStream(std::istream &imtxstream)
 		}
 	}
 }
+
+void MtxSolver::SaveToFile(const std::string &FileName) const
+{
+	std::ofstream mtxFile(FileName.c_str(), std::ios::out);
+	if (!mtxFile)
+	{
+		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "' for save");
+	}
+	SaveToStream(mtxFile);
+}
+
+void MtxSolver::SaveToStream(std::ostream &omtxstream) const
+{
+	omtxstream << data_header.type <<"\n";
+	omtxstream << data_header.version << "\n";
+	omtxstream << data_header.subversion << "\n";
+	omtxstream << size << "\n";
+	omtxstream << std::fixed;
+	if (size > 0)
+	{ 
+		for (size_t i = 0; i < size; i++)
+		{
+			for (size_t j = 0; j < size + 1; j++)
+			{
+				omtxstream << Mtx[i][j] << "\n";
+			}
+		}
+	}
+}	
 
 size_t MtxSolver::getSize() const
 {
