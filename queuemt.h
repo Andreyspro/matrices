@@ -2,13 +2,14 @@
 
 #ifndef QUEUEMT_H
 #define QUEUEMT_H
-#define no_queue_mt_debug
+#define NO_queue_mt_debug
 
 #include <condition_variable>
 #include <iostream>
 #include <mutex>
 #include <queue>
 #include <atomic>
+#include <limits>
 
 template <typename T>
 class queuemt
@@ -21,8 +22,8 @@ private:
 	std::condition_variable notify_push_cv;
 	std::condition_variable notify_pop_cv;
 public:
-	queuemt();
-	queuemt(size_t set_maxsize);
+	// queuemt();
+	queuemt(size_t max_queue_size = std::numeric_limits<size_t>::max());
 	bool try_push(const T &new_value);
 	bool try_push(T &&new_value);
 	bool wait_and_push(T &&value);
@@ -34,12 +35,12 @@ public:
 	void stop_service();
 };
 
-template <typename T>
-queuemt<T>::queuemt()
-	: maxsize(0)
-{
-	end_of_service.store(false);
-}
+// template <typename T>
+// queuemt<T>::queuemt()
+// 	: maxsize(1)
+// {
+// 	end_of_service.store(false);
+// }
 
 template <typename T>
 queuemt<T>::queuemt(size_t max_queue_size)
