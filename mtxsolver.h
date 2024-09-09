@@ -26,20 +26,21 @@ public:
 	const MtxSolver& operator=(const MtxSolver&);
 	const MtxSolver& operator=(MtxSolver&&);
 	void LoadFromFile(const std::string &FileName);
-	void LoadFromStream(std::istream &imtxstream);
+	void LoadFromFileStream(std::istream &imtxstream, const std::string name = "");
 	void SaveToFile(const std::string &FileName) const;
 	void SaveToStream(std::ostream &omtxstream) const;
 	size_t getSize() const;
+	std::string GetMtxName() const;
 	MtxElement getAnswers(size_t index) const;
 	void Solve();
-	void saveAnswers(const std::string& AnswersFileName);
+	void SaveAnswers(const std::string& AnswersFileName);
 	void free();
 private:
 	bool isSolved;
 	size_t size;
 	std::vector<MtxLine> Mtx;
 	std::vector<MtxElement> Answers;
-	std::string MtxFileName;
+	std::string m_mtx_name;
 	mtx_data_header_t data_header;
 };
 

@@ -24,7 +24,7 @@ MtxSolver::MtxSolver(const MtxSolver &copy) // copy constructor
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver start copy constructor ====== \n";
 	#endif
-	MtxFileName = copy.MtxFileName;
+	m_mtx_name = copy.m_mtx_name;
 	Mtx = copy.Mtx;
 	Answers = copy.Answers;
 	#ifdef EXTRAOUT
@@ -38,7 +38,7 @@ MtxSolver::MtxSolver(MtxSolver &&right) // move constructor
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver start move constructor ======\n";
 	#endif
-	MtxFileName = std::move(right.MtxFileName);
+	m_mtx_name = std::move(right.m_mtx_name);
 	Mtx = std::move(right.Mtx);
 	Answers = std::move(right.Answers);
 	#ifdef EXTRAOUT
@@ -62,7 +62,7 @@ const MtxSolver &MtxSolver::operator=(const MtxSolver &copy) //copy assign
 	{
 		isSolved = copy.isSolved;
 		size = copy.size;
-		MtxFileName = copy.MtxFileName;
+		m_mtx_name = copy.m_mtx_name;
 		Mtx = copy.Mtx;
 		Answers = copy.Answers;
 	}
@@ -83,7 +83,7 @@ const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 	{
 		isSolved = right.isSolved;
 		size = right.size;
-		MtxFileName = std::move(right.MtxFileName);
+		m_mtx_name = std::move(right.m_mtx_name);
 		Mtx = std::move(right.Mtx);
 		Answers = std::move(right.Answers);
 	}
@@ -102,11 +102,10 @@ void MtxSolver::LoadFromFile(const std::string &FileName)
 	{
 		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
-	LoadFromStream(mtxFile);
-	MtxFileName = FileName;
+	LoadFromFileStream(mtxFile, FileName);
 }
 
-void MtxSolver::LoadFromStream(std::istream &imtxstream)
+void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string name)
 {
 	std::string cur_type, cur_version, cur_subversion;
 
@@ -125,6 +124,7 @@ void MtxSolver::LoadFromStream(std::istream &imtxstream)
 	cur_type.copy(data_header.type, sizeof(data_header.type));
 	data_header.version = std::stoi(cur_version);
 	data_header.subversion = std::stoi(cur_subversion);
+	m_mtx_name = name;
 
 	imtxstream >> size;
 	Mtx.reserve(size);
@@ -170,6 +170,11 @@ void MtxSolver::SaveToStream(std::ostream &omtxstream) const
 size_t MtxSolver::getSize() const
 {
 	return size;
+}
+
+std::string MtxSolver::GetMtxName() const
+{
+	return m_mtx_name;
 }
 
 MtxElement MtxSolver::getAnswers(size_t index) const
@@ -221,7 +226,7 @@ void MtxSolver::Solve()
 	isSolved = true;
 }
 
-void MtxSolver::saveAnswers(const std::string &AnswersFileNameStr)
+void MtxSolver::SaveAnswers(const std::string &AnswersFileNameStr)
 {
 	if (!isSolved || size == 0)
 		throw std::runtime_error("MtxSolver. Error: Matrix not solved!");
@@ -251,6 +256,6 @@ void MtxSolver::free()
 
 std::ostream &operator<<(std::ostream &output, const MtxSolver &Mtx)
 {
-	output << fs::path(Mtx.MtxFileName).filename();
+	output << fs::path(Mtx.m_mtx_name).filename();
 	return output;
 }
