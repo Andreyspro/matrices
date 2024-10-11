@@ -4,14 +4,7 @@
 #include <vector>
 #include <string>
 
-struct mtx_data_header_t
-{
-	char type[17];
-	int version;
-	int subversion;
-};
-
-const mtx_data_header_t supported_mtx_data_header = {"MatrixSolver    ", 1, 0};
+#include "mtxaux.h"
 
 typedef double MtxElement;
 typedef std::vector<MtxElement> MtxLine;

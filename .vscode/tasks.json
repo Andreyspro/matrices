@@ -2,25 +2,30 @@
 {
   "version": "2.0.0",
   "tasks": [
-    //All files ==============================================================================
+    // Release compile srv
     {
       "type": "shell",
-      "label": "CPP run all files",
+      "label": "task_MtxSolverCompile",
       "command": "/usr/bin/g++",
       "args": [
-        "-Wall",
-        "-std=c++11",
-        "-O2",
-        "${fileDirname}/*.cpp",
-        "-o",
-        "${fileDirname}/bin/${fileBasenameNoExtension}",
-        "-lboost_filesystem",
-        "-lpthread"
-        //"-Wl,-Bdynamic", "-lboost_filesystem",
-        //"-Wl,-Bdynamic", "-lpthread"
+      "-Wall",
+      "-std=c++11",
+      "-O2",
+      "-I./srv",
+      "-I./mtxsolver",
+      "-I./aux",
+      "./src/*.cpp",
+      // "./aux/*.cpp",
+      "./mtxsolver/*.cpp",
+      "-o",
+      "./bin/mtx_solver_server",
+      "-lboost_filesystem",
+      "-lpthread"
+       //"-Wl,-Bdynamic", "-lboost_filesystem",
+      //"-Wl,-Bdynamic", "-lpthread"
       ],
       "options": {
-        "cwd": "${fileDirname}"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": ["$gcc"],
       "group": {
@@ -29,30 +34,98 @@
       },
       "detail": "Build file in directory"
     },
+    // mtx solver debug compile
     {
       "type": "shell",
-      "label": "CPP debug all files",
+      "label": "task_MtxSolverCompile_dbg",
       "command": "/usr/bin/g++",
       "args": [
         "-Wall",
         "-std=c++11",
         // "-O2",
         "-g",
-        "${fileDirname}/*.cpp",
+        "-I./src",
+        "-I./mtxsolver",
+        "-I./aux",
+        "./src/*.cpp",
+        // "./aux/*.cpp",
+        "./mtxsolver/*.cpp",
         "-o",
-        "${fileDirname}/bin/${fileBasenameNoExtension}",
+        "./bin/mtx_solver",
         "-lboost_filesystem",
         "-lpthread"
       ],
       "options": {
-        "cwd": "${fileDirname}"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": ["$gcc"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "Build file in directory with Debug"
+      "detail": "mtx srv dbg"
+    },
+    // mtx server debug compile
+    {
+      "type": "shell",
+      "label": "task_MtxServerCompile_dbg",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        // "-O2",
+        "-g",
+        "-I./srv",
+        "-I./mtxsolver",
+        "-I./aux",
+        "./srv/*.cpp",
+        // "./aux/*.cpp",
+        "./mtxsolver/*.cpp",
+        "-o",
+        "./bin/mtx_server_dbg",
+        "-lboost_filesystem",
+        "-lpthread"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "mtx server dbg"
+    },
+    // mtx CLIENT debug compile
+    {
+      "type": "shell",
+      "label": "task_MtxClientCompile_dbg",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        // "-O2",
+        "-g",
+        "-I./client",
+        "-I./mtxsolver",
+        "-I./aux",
+        "./client/*.cpp",
+        // "./aux/*.cpp",
+        "./mtxsolver/*.cpp",
+        "-o",
+        "./bin/mtx_client_dbg",
+        "-lboost_filesystem",
+        "-lpthread"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "mtx client dbg"
     }
   ]
 }

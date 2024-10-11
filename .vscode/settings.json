@@ -89,7 +89,15 @@
         "shared_mutex": "cpp",
         "cinttypes": "cpp",
         "numbers": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "typeindex": "cpp",
+        "*.h-": "c",
+        "any": "cpp",
+        "coroutine": "cpp",
+        "future": "cpp",
+        "variant": "cpp",
+        "regex": "cpp",
+        "*.ipp": "cpp"
     },
     "cgg" : "C:\\programfiles\\compilers\\msys2\\ucrt64\\bin\\g++.exe",
     "mingw64-gdb_exe": "C:\\programfiles\\compilers\\msys2\\ucrt64\\bin\\gdb.exe",

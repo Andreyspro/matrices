@@ -140,9 +140,9 @@ void print_status ()
 	std::time_t t; 
 	while (true) 
 	{
-		std::this_thread::sleep_for(std::chrono::seconds(1));
 		t = std::time(nullptr);
 		std::strftime(timestr, sizeof(timestr), "%H:%M:%S", std::localtime(&t));
 		std::cout << timestr <<". Solved " << number_of_solved.load() << "\n";
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 }

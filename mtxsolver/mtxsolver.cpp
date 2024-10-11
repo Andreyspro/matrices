@@ -111,15 +111,15 @@ void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string n
 
 	std::getline(imtxstream, cur_type);
 	if (cur_type != supported_mtx_data_header.type)
-		throw std::runtime_error("Current file type not supported. Incorrect type");
+		throw std::runtime_error("Current mtx type not supported. Incorrect type");
 	
 	std::getline(imtxstream, cur_version);
 	if (supported_mtx_data_header.version != std::stoi(cur_version))
-		throw std::runtime_error("Current file type not supported. Incorrect version");
+		throw std::runtime_error("Current mtx type not supported. Incorrect version");
 	
 	std::getline(imtxstream, cur_subversion);
 	if (supported_mtx_data_header.subversion != std::stoi(cur_subversion))
-		throw std::runtime_error("Current file type not supported. Incorrect subversion");
+		throw std::runtime_error("Current mtx type not supported. Incorrect subversion");
 	
 	cur_type.copy(data_header.type, sizeof(data_header.type));
 	data_header.version = std::stoi(cur_version);

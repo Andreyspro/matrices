@@ -2,25 +2,25 @@
     "configurations": [
         // RUN all files========================================================
         {
-            "name": "CPP run all",
+            "name": "mtx_compile_and_run",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/bin/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/bin/mtx_solver",
             "externalConsole": true,
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
-            "preLaunchTask": "CPP run all files"
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "task_MtxSolverCompile"
         },
         {
-            "name": "CPP debug all",
+            "name": "MtxSolverCompileRun_dbg",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${fileDirname}/bin/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/bin/mtx_solver",
             "args": [
             ],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
@@ -32,7 +32,51 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "CPP debug all files"
+            "preLaunchTask": "task_MtxSolverCompile_dbg"
+        },
+        {
+            "name": "MtxServerCompileRun_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_server_dbg",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_MtxServerCompile_dbg"
+        },
+        {
+            "name": "MtxClientCompileRun_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_client_dbg",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_MtxClientCompile_dbg"
         }
     ],
     "version": "2.0.0"
