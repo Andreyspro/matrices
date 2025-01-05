@@ -3,15 +3,19 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "boost/filesystem.hpp"
 
 #include "mtxsolver.h"
+#include "and_net.h"
 
 namespace fs = boost::filesystem;
+namespace net = boost::asio;
+using tcp = net::ip::tcp;
 
 MtxSolver::MtxSolver() // default constructor
-	: isSolved(false), size(0), data_header(supported_mtx_data_header)
+	: isSolved(false), size(0), data_header(mtx::supported_data_header)
 {
 	#ifdef EXTRAOUT
 		std::cout << "MtxSolver default constructor ======\n";
@@ -95,14 +99,18 @@ const MtxSolver &MtxSolver::operator=(MtxSolver &&right)
 	#endif
 }
 
-void MtxSolver::LoadFromFile(const std::string &FileName)
+void MtxSolver::LoadFromFile(const std::string &FileName, const std::string &name)
 {
 	std::ifstream mtxFile(FileName.c_str(), std::ios::in);
 	if (!mtxFile)
 	{
 		throw std::runtime_error("MtxSolver. Cant open file '" + FileName + "'");
 	}
-	LoadFromFileStream(mtxFile, FileName);
+	LoadFromFileStream(mtxFile, name);
+}
+void MtxSolver::LoadFromFile(const std::string &FileName)
+{
+	LoadFromFile(FileName, fs::path(FileName).filename().string());
 }
 
 void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string name)
@@ -110,16 +118,14 @@ void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string n
 	std::string cur_type, cur_version, cur_subversion;
 
 	std::getline(imtxstream, cur_type);
-	if (cur_type != supported_mtx_data_header.type)
+	if (cur_type != mtx::supported_data_header.type)
 		throw std::runtime_error("Current mtx type not supported. Incorrect type");
 	
 	std::getline(imtxstream, cur_version);
-	if (supported_mtx_data_header.version != std::stoi(cur_version))
-		throw std::runtime_error("Current mtx type not supported. Incorrect version");
-	
 	std::getline(imtxstream, cur_subversion);
-	if (supported_mtx_data_header.subversion != std::stoi(cur_subversion))
-		throw std::runtime_error("Current mtx type not supported. Incorrect subversion");
+
+	if (!mtx::data_is_supported(cur_version, cur_subversion))
+		throw std::runtime_error("Current mtx not supported. Incorrect version");
 	
 	cur_type.copy(data_header.type, sizeof(data_header.type));
 	data_header.version = std::stoi(cur_version);
@@ -134,6 +140,55 @@ void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string n
 		for (size_t j = 0; j <= size; j++)
 		{
 			imtxstream >> Mtx[i][j];
+		}
+	}
+}
+
+void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
+{
+	#ifdef EXTRAOUT
+	std::cout << "Start load from NET start\n";
+	#endif
+	std::string cur_type, cur_version, cur_subversion;
+	cur_type = net_connection.read_str("\r\n");
+	if (cur_type != mtx::supported_data_header.type)
+		throw std::runtime_error("Current mtx type not supported. Incorrect type");
+	
+	cur_version = net_connection.read_str("\r\n");
+	cur_subversion = net_connection.read_str("\r\n");
+	if (!mtx::data_is_supported(cur_version, cur_subversion))
+		throw std::runtime_error("Current mtx not supported. Incorrect version");
+
+
+	#ifdef EXTRAOUT
+	std::cout << "Readed version " << cur_type << "." << cur_version "." << cur_subversion << "\n";
+	#endif
+	size = stoi(net_connection.read_str("\r\n"));
+	Mtx.reserve(size);
+	for (size_t i = 0; i < size; i++)
+	{
+		Mtx.emplace_back(size + 1);
+		for (size_t j = 0; j <= size; j++)
+		{
+			Mtx[i][j] = stod(net_connection.read_str("\r\n"));
+		}
+	}
+	#ifdef EXTRAOUT
+	std::cout << "Start load from NET end\n";
+	#endif
+}
+
+void MtxSolver::SendToNet(tcp::socket &sock)
+{
+	net::write(sock, net::buffer(std::string(data_header.type) + "\r\n"));
+	net::write(sock, net::buffer(std::to_string(data_header.version) + "\r\n"));
+	net::write(sock, net::buffer(std::to_string(data_header.subversion) + "\r\n"));
+	net::write(sock, net::buffer(std::to_string(size) + "\r\n"));
+	for (auto const &line: Mtx) 
+	{
+		for (auto const &element: line)
+		{
+			net::write(sock, net::buffer(std::to_string(element) + "\r\n"));
 		}
 	}
 }

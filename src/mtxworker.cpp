@@ -8,6 +8,7 @@
 #include "mtxworker.h"
 #include "perf_timer.h"
 
+namespace fs = boost::filesystem;
 extern size_t verbosity;
 std::atomic_size_t number_of_solved(0);
 

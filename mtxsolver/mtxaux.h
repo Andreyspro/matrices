@@ -7,15 +7,14 @@
 #define MTX_VER_MINOR 0
 #define MTX_VER_PATCH 0
 
+
+
 #define MTX_HELLO_SIZE 32
 #define MTX_HELLO_PREFIX "         MTXSOLVER-HELLO"
 #define MTX_HEADER_HELLO "         MTXSOLVER-HELLO,1.0.0##" //HELLO string and version + end symbol ##
-typedef int mtx_version_t;
-mtx_version_t get_hello_version (std::string s_hello);
-
 // commands
-#define MTX_CMD_SIZE = 32
-#define MTXCMD_RECEIVE_MTX_AND_CALC = "     MTXCMD_RECEIVE_MTX_AND_CALC"
+#define MTX_CMD_SIZE 32
+#define MTX_CMD_RECEIVE_MTX_AND_CALC "     MTXCMD_RECEIVE_MTX_AND_CALC"
 // #define MTXCMD_START_SESSION = "MTXCMD_c28fc4d7-d369-4c3b-b07f-a5a464194582"
 // #define MTXCMD_RECEIVE_MTX = "MTXCMD_77866dd2-cba9-4e3a-ab9b-8dd1cf50a882"
 // #define MTXCMD_RECEIVE_ANSWER = "MTXCMD_6bdb06cd-0535-4df9-ae61-682ee463b1e6"
@@ -24,15 +23,27 @@ mtx_version_t get_hello_version (std::string s_hello);
 
 #define MTXFLOW_END_FlAG = "\r\n\r\n"
 
-struct mtx_data_header_t
+namespace mtx {
+
+typedef size_t version_t;
+
+const version_t curr_supported_ver = 1000000;
+
+version_t parse_hello (std::string s_hello);
+version_t to_wide_ver(size_t ver, size_t sub_ver);
+bool data_is_supported(size_t ver, size_t sub_ver);
+bool data_is_supported(std::string ver, std::string sub_ver);
+
+struct data_header_t
 {
 	char type[17];
 	int version;
 	int subversion;
 };
 
-const mtx_data_header_t supported_mtx_data_header = {"MatrixSolver    ", 1, 0};
-const boost::asio::ip::port_type mtx_def_ip_port = 18404;
+const data_header_t supported_data_header = {"MatrixSolver    ", 1, 0};
+const boost::asio::ip::port_type def_ip_port = 18404;
 
+} //namespace mtx
 
-#endif
+#endif //#ifdef MTXAUX_H

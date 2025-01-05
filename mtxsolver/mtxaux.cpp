@@ -5,9 +5,11 @@
 
 #include "mtxaux.h"
 
-#define EXTRAOUT
+#define NO_EXTRAOUT
 
-mtx_version_t get_hello_version (std::string s_hello)
+namespace mtx {
+
+version_t parse_hello (std::string s_hello)
 {
 	// parse version in negotiating hello-string
 	// For example string "         MTXSOLVER-HELLO,2.5.13##"
@@ -42,6 +44,36 @@ mtx_version_t get_hello_version (std::string s_hello)
 			#endif
 		}
 	}
-	return -1;
+	return 0;
 }
 
+version_t to_wide_ver(size_t ver, size_t sub_ver)
+{
+	return ver * 1000 + sub_ver;
+}
+
+bool data_is_supported(size_t ver, size_t sub_ver)
+{
+	version_t curr_ver = to_wide_ver(ver, sub_ver);
+	version_t supported_ver = to_wide_ver(supported_data_header.version, supported_data_header.subversion);
+	return curr_ver <= supported_ver;
+}
+
+bool data_is_supported(std::string ver, std::string sub_ver)
+{
+	try 
+	{
+		return data_is_supported(std::stoi(ver), std::stoi(sub_ver));
+	}
+	catch (const std::invalid_argument &e)
+	{
+		// throw std::runtime_error("Error while check matrix version");
+	}
+	catch (...)
+	{
+		
+	}
+	return false;
+}
+
+} // namespace mtx

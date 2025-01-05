@@ -6,25 +6,121 @@
 #include "boost/asio.hpp"
 #include "mtxsolver.h"
 #include "mtxaux.h"
+#include "and_net.h"
+
+#define EXTRAOUT
+
+namespace net = boost::asio;
+using tcp = net::ip::tcp;
 
 // namespace fs = boost::filesystem;
 
 size_t verbosity = 2;
 
+void handle_connection(tcp::socket &sock)
+{
+	and_net::net_one net1(&sock);
+	mtx::version_t client_hello_version = mtx::parse_hello(net1.read_str("\r\n"));
+	if (client_hello_version > mtx::curr_supported_ver)
+	{
+		throw (std::runtime_error("Client version not supported"));
+	}
+	std::string command = net1.read_str("\r\n");
+	if (command == MTX_CMD_RECEIVE_MTX_AND_CALC) {
+		MtxSolver mtx;
+		#ifdef EXTRAOUT
+			std::cout << "Start LoadFromNet\n";
+		#endif
+		mtx.LoadFromNet(net1);
+		#ifdef EXTRAOUT
+			std::cout << "End LoadFromNet\n";
+		#endif
+		#ifdef EXTRAOUT
+			std::cout << "Start solving\n";
+		#endif
+		mtx.Solve();
+		#ifdef EXTRAOUT
+			std::cout << "End solving\n";
+			std::cout << "Start save\n";
+		#endif
+		mtx.SaveAnswers("./data/net.ans");
+		#ifdef EXTRAOUT
+			std::cout << "End save\n";
+		#endif
+	} else {
+		throw (std::runtime_error("Unknow command from client"));
+	}
+}
+
 void server_works()
 {
-	using namespace boost::asio;
+	// using namespace boost::asio;
+
 	std::cout << "Start server !\n";
 	try
 	{
-		std::cout << "version -" << get_hello_version("         MTXSOLVER-HELLO,011.23.459##") << "\n";
-		// ip::tcp::endpoint ep(ip::tcp::v4(), mtx_def_ip_port);
-		// boost::asio::io_service service;
-		// ip::tcp::acceptor acceptor(service, ep);
-		// ip::tcp::socket sock(service);
-		// std::cout << "Wait for connections...\n";
-		// acceptor.accept(sock);
-		// std::cout << "Connection ok\n";
+		// std::cout << "version -" << get_hello_version("         MTXSOLVER-HELLO,011.23.459##") << "\n";
+		net::ip::tcp::endpoint ep(tcp::v4(), mtx::def_ip_port);
+		net::io_service service;
+		tcp::acceptor acceptor(service, ep);
+		tcp::socket sock(service);
+		std::cout << "Wait for connections...\n";
+		acceptor.accept(sock);
+		std::cout << "Connection ok\n";
+		std::cout << "Start handle connection\n";
+		try
+		{
+			handle_connection(sock);
+		}
+		catch (std::runtime_error const &ex)
+		{
+			std::cout << "Error: " << ex.what() << "\n";
+		}
+		std::cout << "Handle connection done\n";
+
+
+
+
+		// size_t bytes;
+		// net::streambuf read_buf;
+		// std::istream read_stream(&read_buf);
+		// std::string read_str;
+
+		// bytes = read(sock, read_buf,  net::transfer_exactly(MTX_HELLO_SIZE));
+
+		// std::getline(read_stream, read_str);
+		// bytes = net::read(sock, read_buf,  net::transfer_exactly(MTX_HELLO_SIZE));
+		// std::getline(read_stream, read_str);
+		// std::cout << "'" << read_str << "'\n";
+
+		// bytes = read(sock, read_buf,  transfer_exactly(MTX_HELLO_SIZE));
+		// std::cout << "Read hello  ok\n";
+		// std::getline(read_stream, read_str);
+		// std::cout << "hello_str is: \'" << read_str << "\'\n";
+		// mtx_version_t hello_ver = get_hello_version(read_str);
+		// if ( hello_ver >= 0 && hello_ver <= mtx_curr_suppoted_ver) {
+		// 	std::cout << "Negotiation OK" << std::endl;
+		// } else {
+		// 	std::cout << "Negotiation failed\n";
+		// }
+
+
+		// read_buf.commit()
+		// bytes = read(sock, read_buf,  transfer_exactly(MTX 
+		// std::cout << "CMD is : \'" << read_str << "\'\n";
+		// if (read_str == MTX_CMD_RECEIVE_MTX_AND_CALC)
+		// {
+		// 	std::cout << "Start load matrix.\n";
+
+			
+		// } else 
+		// {
+		// 	std::cout << "Receive unknown command.\n";
+		// }
+
+
+
+
 		// size_t i = 0;
 		// std::cout << std::fixed;
 
