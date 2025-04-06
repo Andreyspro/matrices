@@ -1,8 +1,7 @@
 {
   "version": "2.0.0",
   "tasks": [
-
-    // mtx solver debug compile
+    // MTX Solver classic
     {
       "type": "shell",
       "label": "task_MtxSolverCompile_dbg",
@@ -16,11 +15,9 @@
         "-I./mtxsolver",
         "-I./aux",
         "-I./and_net/and_net1/",
-        
         "./src/*.cpp",
         "./mtxsolver/*.cpp",
         "./and_net/and_net1/*.cpp",
-
         "-o",
         "./bin/mtx_solver_dbg",
         "-lboost_filesystem",
@@ -48,15 +45,18 @@
         "-Wall",
         "-std=c++11",
         "-g",
+
         "-I./worker",
         "-I./mtxsolver",
+        "-I./mtxsolver/async",
         "-I./aux",
-        "-I./and_net/and_net1",
         "-I./and_net/and_net3",
+        
+        "./mtxsolver/async/*.cpp",
         "./worker/*.cpp",
         "./mtxsolver/*.cpp",
-        "./and_net/and_net1/*.cpp",
         "./and_net/and_net3/*.cpp",
+
         "-o",
         "./bin/mtx_worker_dbg",
         "-lboost_filesystem",
@@ -81,16 +81,19 @@
       "args": [
         "-Wall",
         "-std=c++11",
-        "-O3",
+        "-O2",
+
         "-I./worker",
         "-I./mtxsolver",
+        "-I./mtxsolver/async",
         "-I./aux",
-        "-I./and_net/and_net1",
         "-I./and_net/and_net3",
+        
+        "./mtxsolver/async/*.cpp",
         "./worker/*.cpp",
         "./mtxsolver/*.cpp",
-        "./and_net/and_net1/*.cpp",
         "./and_net/and_net3/*.cpp",
+
         "-o",
         "./bin/mtx_worker_release",
         "-lboost_filesystem",
@@ -116,16 +119,17 @@
       "args": [
         "-Wall",
         "-std=c++11",
-        // "-O2",
         "-g",
-        "-I./and_net/and_net1",
+
+        "-I./and_net/and_net3",
         "-I./client",
         "-I./mtxsolver",
         "-I./aux",
-        "./and_net/and_net1/*.cpp",
-        // "./aux/*.cpp",
+
+        "./and_net/and_net3/*.cpp",
         "./client/*.cpp",
         "./mtxsolver/*.cpp",
+
         "-o",
         "./bin/mtx_client_dbg",
         "-lboost_filesystem",
@@ -154,12 +158,12 @@
         "-std=c++11",
         "-g",
 
-        "-I./and_net/and_net1",
+        "-I./and_net/and_net3",
         "-I./srv",
         "-I./mtxsolver",
         "-I./aux",
 
-        "./and_net/and_net1/*.cpp",
+        "./and_net/and_net3/*.cpp",
         "./srv/*.cpp",
         "./mtxsolver/*.cpp",
 
@@ -190,15 +194,15 @@
         "-Wall",
         "-std=c++11",
         "-g",
-        "-I./and_net/and_net1",
-        // "-I./and_net/and_net3",
+
+        "-I./and_net/and_net3",
         "-I./aux",
         "-I./mtxsolver",
-        // "./aux/*.cpp",
-        "./and_net/and_net1/*.cpp",
-        // "./and_net/and_net3/*.cpp",
+
+        "./and_net/and_net3/*.cpp",
         "./mtxsolver/*.cpp",
         "./generator/*.cpp",
+
         "-o",
         "./bin/mtx_generator_dbg",
         "-lboost_filesystem",

@@ -33,6 +33,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_worker_dbg",
             "args": [
+                "2"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
