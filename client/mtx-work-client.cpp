@@ -13,7 +13,7 @@
 
 size_t verbosity = 2;
 
-void client_works() {
+void client_works(const std::string &mtx_data_file_path) {
 	using namespace boost::asio;
 	std::cout << "Start client !\n";
 	try {
@@ -24,9 +24,9 @@ void client_works() {
 		sock.connect(ep);
 		std::cout << "Connecting ok \n";
 		MtxSolver mtx;
-		mtx.LoadFromFile("/home/andreys/mtxs/matrix-3.1d7e12.mtx");
-		write(sock, buffer(std::string(MTX_HEADER_HELLO) + "\r\n"));
-		write(sock, buffer(std::string(MTX_CMD_RECEIVE_MTX_AND_CALC) + "\r\n"));
+		mtx.LoadFromFile(mtx_data_file_path);
+		write(sock, buffer(std::string(MTX_NET_HEADER_HELLO) + "\n"));
+		write(sock, buffer(std::string(MTX_NET_CMD_RECEIVE_MTX_AND_CALC) + "\n"));
 		std::cout << "Send matrix \n";
 		mtx.SendToNet(sock);
 		std::cout << "Send matrix done \n";
@@ -41,8 +41,18 @@ void client_works() {
 
 int main(int argc, char *argv[])
 {
+	std::string mtx_data_file;
+	if (argc >= 2)
+	{
+		mtx_data_file = argv[1];
+	}
+	else
+	{
+		std::cout << "Error. argument 1 is empty.\n";
+		exit(1);
+	}
 	std::cout << "Main start... \n";
-	client_works();
+	client_works(mtx_data_file);
 	std::cout << "Main end. \n";
 	std::cin.get();
 

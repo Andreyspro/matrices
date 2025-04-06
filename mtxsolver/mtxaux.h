@@ -9,12 +9,12 @@
 
 
 
-#define MTX_HELLO_SIZE 32
-#define MTX_HELLO_PREFIX "         MTXSOLVER-HELLO"
-#define MTX_HEADER_HELLO "         MTXSOLVER-HELLO,1.0.0##" //HELLO string and version + end symbol ##
+#define MTX_NET_HELLO_SIZE 32
+#define MTX_NET_HELLO_PREFIX "         MTXSOLVER-HELLO"
+#define MTX_NET_HEADER_HELLO "         MTXSOLVER-HELLO,1.0.0##" //HELLO string and version + end symbol ##
 // commands
-#define MTX_CMD_SIZE 32
-#define MTX_CMD_RECEIVE_MTX_AND_CALC "     MTXCMD_RECEIVE_MTX_AND_CALC"
+#define MTX_NET_CMD_SIZE 32
+#define MTX_NET_CMD_RECEIVE_MTX_AND_CALC "     MTXCMD_RECEIVE_MTX_AND_CALC"
 // #define MTXCMD_START_SESSION = "MTXCMD_c28fc4d7-d369-4c3b-b07f-a5a464194582"
 // #define MTXCMD_RECEIVE_MTX = "MTXCMD_77866dd2-cba9-4e3a-ab9b-8dd1cf50a882"
 // #define MTXCMD_RECEIVE_ANSWER = "MTXCMD_6bdb06cd-0535-4df9-ae61-682ee463b1e6"
@@ -27,9 +27,9 @@ namespace mtx {
 
 typedef size_t version_t;
 
-const version_t curr_supported_ver = 1000000;
+const version_t MTX_NET_SUPPORTED_VER = 1000000;
 
-version_t parse_hello (std::string s_hello);
+version_t parse_net_hello (std::string s_hello);
 version_t to_wide_ver(size_t ver, size_t sub_ver);
 bool data_is_supported(size_t ver, size_t sub_ver);
 bool data_is_supported(std::string ver, std::string sub_ver);

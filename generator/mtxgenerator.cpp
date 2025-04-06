@@ -14,7 +14,7 @@
 
 namespace fs = boost::filesystem;
 
-int main(){ 
+int main(const int argc, char *argv[]){ 
 	int elementCount;
 	double val;
 	int multiple;
@@ -23,7 +23,13 @@ int main(){
 	std::string mtxFileNameUID;
 	// std::stringstream mtxFileName;
 	std::string mtxFileName;
-	std::string mtxDir("/home/andreys/mtxs");
+	// std::string mtxDir("/home/andreys/mtxs");
+	if (argc < 2)
+	{
+		std::cout << "Error. No argument - mtx directory .";
+	}
+	std::string mtxDir = argv[1];
+
 	fs::path mtxFilePath;
 
 	srand(time(0));

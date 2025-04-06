@@ -1,23 +1,14 @@
 {
     "configurations": [
-        // RUN all files========================================================
-        {
-            "name": "mtx_compile_and_run",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/bin/mtx_solver",
-            "externalConsole": true,
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "preLaunchTask": "task_MtxSolverCompile"
-        },
+        // Solver multithread
         {
             "name": "MtxSolverCompileRun_dbg",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/mtx_solver",
+            "program": "${workspaceFolder}/bin/mtx_solver_dbg",
             "args": [
+                "/home/andreys/dev_example_data/mtxs/",
+                "/home/andreys/dev_example_data/answers/"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -35,13 +26,66 @@
             "preLaunchTask": "task_MtxSolverCompile_dbg"
         },
 
+        // MTX WORKER DBG
+        {
+            "name": "MtxWorkerCompileRun_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_worker_dbg",
+            "args": [
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_MtxWorkerCompile_dbg"
+        },
 
+
+        // MTX WORKER release
+        {
+            "name": "MtxWorkerCompileRun_release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_worker_release",
+            "args": [
+                "2",
+                "__",
+                "8"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_MtxWorkerCompile_release"
+        },
+
+        // MTX server compile DBG ==========================================
         {
             "name": "MtxServerCompileRun_dbg",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_server_dbg",
             "args": [
+                "/home/andreys/dev_example_data/mtx_answer.txt"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -59,12 +103,14 @@
             "preLaunchTask": "task_MtxServerCompile_dbg"
         },
 
+        // MTX client compile DBG ==========================================
         {
             "name": "MtxClientCompileRun_dbg",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_client_dbg",
             "args": [
+                "/home/andreys/dev_example_data/mtxs/matrix-5.22f456.mtx"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -82,13 +128,14 @@
             "preLaunchTask": "task_MtxClientCompile_dbg"
         },
 
-
+        // Generator ==================================
         {
             "name": "generator_dbg",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_generator_dbg",
             "args": [
+                "/home/andreys/dev_example_data/mtxs/"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -104,6 +151,133 @@
                 }
             ],
             "preLaunchTask": "task_mtxgnerator_dbg"
+        },
+
+        // TEST AND_NET2 SERVER DEBUG===================================
+        {
+            "name": "test-and_net2_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test-and_net2_dbg",
+            "args": [
+                "2"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_test-and_net2_dbg"
+        },
+
+        // TEST AND_NET2 RELEASE ====================================
+        {
+            "name": "test-and_net2_release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test-and_net2_release",
+            "args": [
+                "2"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_test-and_net2_release"
+        },
+
+        // TEST AND_NET2 CLIENT
+        {
+            "name": "test-and_net2_client_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test-and_net2_dbg",
+            "args": [
+                "1"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_test-and_net2_dbg"
+        },
+
+        // TEST AND_NET3 DEBUG===================================
+        {
+            "name": "test-and_net3_dbg",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test-and_net3_dbg",
+            "args": [
+                "2",
+                "~/dev_example_data/data/out.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_test-and_net3_dbg"
+        },
+
+        // TEST AND_NET3 RELEASE O2 ===================================
+        {
+            "name": "test-and_net3_release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/test-and_net3_release",
+            "args": [
+                "2",
+                "~/dev_example_data/data/out.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_test-and_net3_release"
         }
     ],
     "version": "2.0.0"

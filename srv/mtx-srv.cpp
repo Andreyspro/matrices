@@ -17,16 +17,16 @@ using tcp = net::ip::tcp;
 
 size_t verbosity = 2;
 
-void handle_connection(tcp::socket &sock)
+void handle_connection(tcp::socket &sock, const std::string &answer_file_path)
 {
 	and_net::net_one net1(&sock);
-	mtx::version_t client_hello_version = mtx::parse_hello(net1.read_str("\r\n"));
-	if (client_hello_version > mtx::curr_supported_ver)
+	mtx::version_t client_hello_version = mtx::parse_net_hello(net1.read_str("\n"));
+	if (client_hello_version > mtx::MTX_NET_SUPPORTED_VER)
 	{
 		throw (std::runtime_error("Client version not supported"));
 	}
-	std::string command = net1.read_str("\r\n");
-	if (command == MTX_CMD_RECEIVE_MTX_AND_CALC) {
+	std::string command = net1.read_str("\n");
+	if (command == MTX_NET_CMD_RECEIVE_MTX_AND_CALC) {
 		MtxSolver mtx;
 		#ifdef EXTRAOUT
 			std::cout << "Start LoadFromNet\n";
@@ -43,7 +43,7 @@ void handle_connection(tcp::socket &sock)
 			std::cout << "End solving\n";
 			std::cout << "Start save\n";
 		#endif
-		mtx.SaveAnswers("./data/net.ans");
+		mtx.SaveAnswers(answer_file_path);
 		#ifdef EXTRAOUT
 			std::cout << "End save\n";
 		#endif
@@ -52,7 +52,7 @@ void handle_connection(tcp::socket &sock)
 	}
 }
 
-void server_works()
+void server_works(const std::string &answer_file_path)
 {
 	// using namespace boost::asio;
 
@@ -70,7 +70,7 @@ void server_works()
 		std::cout << "Start handle connection\n";
 		try
 		{
-			handle_connection(sock);
+			handle_connection(sock, answer_file_path);
 		}
 		catch (std::runtime_error const &ex)
 		{
@@ -201,7 +201,18 @@ void server_works()
 int main(int argc, char *argv[])
 {
 	std::cout << "Main start... \n";
-	server_works();
+
+	std::string answer_file_path = "";
+	if (argc >= 2) {
+		answer_file_path = argv[1];
+	}
+	else
+	{
+		std::cout << "Error. No argument answer file name..\n";
+		exit(1);
+	}
+	std::cout << "Answer file name - " << answer_file_path << "\n";
+	server_works(answer_file_path);
 	std::cout << "Main end. \n";
 	std::cin.get();
 

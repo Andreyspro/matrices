@@ -9,7 +9,7 @@
 
 namespace mtx {
 
-version_t parse_hello (std::string s_hello)
+version_t parse_net_hello (std::string hello_str)
 {
 	// parse version in negotiating hello-string
 	// For example string "         MTXSOLVER-HELLO,2.5.13##"
@@ -17,11 +17,11 @@ version_t parse_hello (std::string s_hello)
 	// version string "2.5.13" is parsed as 2005013
 	std::regex reg("^(.*),(\\d+).(\\d+).(\\d+)##$");
 	std::smatch match;
-	std::regex_search(s_hello, match, reg);
+	std::regex_search(hello_str, match, reg);
 	#ifdef EXTRAOUT
 	std::cout << "size -> " << match.size() << "\n";
 	#endif
-	if (match.size() == 5 && match[1].str() == MTX_HELLO_PREFIX) 
+	if (match.size() == 5 && match[1].str() == MTX_NET_HELLO_PREFIX) 
 	{
 		#ifdef EXTRAOUT
 		std::cout << "0 -> " << match[0].str() << "\n";

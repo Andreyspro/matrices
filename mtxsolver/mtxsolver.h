@@ -17,7 +17,7 @@ class MtxSolver {
 	friend std::ostream &operator<<(std::ostream &, const MtxSolver &);
 public:
 	MtxSolver();
-	MtxSolver(const MtxSolver& right); // move constructor 
+	MtxSolver(const MtxSolver& right); // copy constructor 
 	MtxSolver(MtxSolver&& right); // move constructor 
 	~MtxSolver();
 	const MtxSolver& operator=(const MtxSolver&);
@@ -35,7 +35,7 @@ public:
 	void Solve();
 	void SaveAnswers(const std::string& AnswersFileName);
 	void free();
-private:
+protected:
 	bool isSolved;
 	size_t size;
 	std::vector<MtxLine> Mtx;

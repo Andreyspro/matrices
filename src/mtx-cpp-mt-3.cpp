@@ -17,32 +17,31 @@
 
 namespace fs = boost::filesystem;
 
-std::string mtxPath{"/home/andreys/mtxs/"};
+// std::string mtxPath{"/home/andreys/mtxs/"};
 size_t verbosity = 2;
 
 int main(int argc, char *argv[])
 {
+	std::string mtx_path;
+	std::string answers_path;
+
 	size_t MAX_PREFETCH_MTX = 6;
 	size_t MAX_LOAD_THREADS = 2;
 	size_t MAX_CALC_THREADS = 4;
 	size_t MAX_SAVE_THREADS = 1;
 	size_t finded_mtx = 0;
 	std::cout << "Main start... \n";
-	if (argc == 6) {
-		try
-		{
-			MAX_PREFETCH_MTX = std::stoi(std::string(argv[1]));
-			MAX_LOAD_THREADS = std::stoi(std::string(argv[2]));
-			MAX_CALC_THREADS = std::stoi(std::string(argv[3]));
-			MAX_SAVE_THREADS = std::stoi(std::string(argv[4]));
-			verbosity = std::stoi(std::string(argv[5]));
-		}
-		catch (std::invalid_argument const& ex)
-		{
-			std::cout << "Error in run arguments: " << ex.what() << '\n';
-			exit(1);
-		}
+	if (argc == 3)
+	{
+		mtx_path = argv[1];
+		answers_path = argv[2];
 	}
+	else
+	{
+		std::cout << "Error. No argument !\n";
+	}
+	std::cout << "mtx path - " << mtx_path <<"\n";
+	std::cout << "answers path - " << answers_path <<"\n";
 	std::cout << "MAX_PREFETCH_MTX - " << MAX_PREFETCH_MTX <<"\n";
 	std::cout << "MAX_LOAD_THREADS - " << MAX_LOAD_THREADS <<"\n";
 	std::cout << "MAX_CALC_THREADS - " << MAX_CALC_THREADS <<"\n";
@@ -93,7 +92,7 @@ int main(int argc, char *argv[])
 			std::thread(
 				save_answers,
 				std::ref(mtx_solved_list),
-				std::string("./answers/")
+				answers_path
 			)
 		);
 	}
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
 	// Fill source of matrices.
 	std::cout << "Start search files to load. ========================================\n";
 	mtx_source_t mtx_source;
-	for (auto const &mtx_path : fs::directory_iterator(mtxPath))
+	for (auto const &mtx_path : fs::directory_iterator(mtx_path))
 	{
 		if (!fs::is_directory(mtx_path)) {
 			++finded_mtx;

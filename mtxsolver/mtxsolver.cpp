@@ -6,6 +6,7 @@
 #include <string>
 
 #include "boost/filesystem.hpp"
+#include "boost/algorithm/string.hpp"
 
 #include "mtxsolver.h"
 #include "and_net.h"
@@ -150,12 +151,12 @@ void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
 	std::cout << "Start load from NET start\n";
 	#endif
 	std::string cur_type, cur_version, cur_subversion;
-	cur_type = net_connection.read_str("\r\n");
+	cur_type = net_connection.read_str("\n");
 	if (cur_type != mtx::supported_data_header.type)
 		throw std::runtime_error("Current mtx type not supported. Incorrect type");
 	
-	cur_version = net_connection.read_str("\r\n");
-	cur_subversion = net_connection.read_str("\r\n");
+	cur_version = net_connection.read_str("\n");
+	cur_subversion = net_connection.read_str("\n");
 	if (!mtx::data_is_supported(cur_version, cur_subversion))
 		throw std::runtime_error("Current mtx not supported. Incorrect version");
 
@@ -163,14 +164,14 @@ void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
 	#ifdef EXTRAOUT
 	std::cout << "Readed version " << cur_type << "." << cur_version "." << cur_subversion << "\n";
 	#endif
-	size = stoi(net_connection.read_str("\r\n"));
+	size = stoi(net_connection.read_str("\n"));
 	Mtx.reserve(size);
 	for (size_t i = 0; i < size; i++)
 	{
 		Mtx.emplace_back(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			Mtx[i][j] = stod(net_connection.read_str("\r\n"));
+			Mtx[i][j] = stod(net_connection.read_str("\n"));
 		}
 	}
 	#ifdef EXTRAOUT
@@ -180,15 +181,15 @@ void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
 
 void MtxSolver::SendToNet(tcp::socket &sock)
 {
-	net::write(sock, net::buffer(std::string(data_header.type) + "\r\n"));
-	net::write(sock, net::buffer(std::to_string(data_header.version) + "\r\n"));
-	net::write(sock, net::buffer(std::to_string(data_header.subversion) + "\r\n"));
-	net::write(sock, net::buffer(std::to_string(size) + "\r\n"));
+	net::write(sock, net::buffer(std::string(data_header.type) + "\n"));
+	net::write(sock, net::buffer(std::to_string(data_header.version) + "\n"));
+	net::write(sock, net::buffer(std::to_string(data_header.subversion) + "\n"));
+	net::write(sock, net::buffer(std::to_string(size) + "\n"));
 	for (auto const &line: Mtx) 
 	{
 		for (auto const &element: line)
 		{
-			net::write(sock, net::buffer(std::to_string(element) + "\r\n"));
+			net::write(sock, net::buffer(std::to_string(element) + "\n"));
 		}
 	}
 }

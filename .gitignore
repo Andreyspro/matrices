@@ -2,3 +2,5 @@ answers/
 .vscode/
 bin/
 data/
+*.drawio.dtmp
+*.drawio.bkp

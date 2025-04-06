@@ -1,39 +1,7 @@
-
 {
   "version": "2.0.0",
   "tasks": [
-    // Release compile srv
-    {
-      "type": "shell",
-      "label": "task_MtxSolverCompile",
-      "command": "/usr/bin/g++",
-      "args": [
-      "-Wall",
-      "-std=c++11",
-      "-O2",
-      "-I./srv",
-      "-I./mtxsolver",
-      "-I./aux",
-      "./src/*.cpp",
-      // "./aux/*.cpp",
-      "./mtxsolver/*.cpp",
-      "-o",
-      "./bin/mtx_solver_server",
-      "-lboost_filesystem",
-      "-lpthread"
-       //"-Wl,-Bdynamic", "-lboost_filesystem",
-      //"-Wl,-Bdynamic", "-lpthread"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": ["$gcc"],
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "detail": "Build file in directory"
-    },
+
     // mtx solver debug compile
     {
       "type": "shell",
@@ -47,55 +15,99 @@
         "-I./src",
         "-I./mtxsolver",
         "-I./aux",
+        "-I./and_net/and_net1/",
+        
         "./src/*.cpp",
-        "./aux/*.cpp",
         "./mtxsolver/*.cpp",
+        "./and_net/and_net1/*.cpp",
+
         "-o",
-        "./bin/mtx_solver",
+        "./bin/mtx_solver_dbg",
         "-lboost_filesystem",
         "-lpthread"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [
+        "$gcc"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "mtx srv dbg"
+      "detail": "mtx solver dbg"
     },
-    // mtx SERVER debug compile
+
+    // mtx WORKER debug compile
     {
       "type": "shell",
-      "label": "task_MtxServerCompile_dbg",
+      "label": "task_MtxWorkerCompile_dbg",
       "command": "/usr/bin/g++",
       "args": [
         "-Wall",
         "-std=c++11",
-        // "-O2",
         "-g",
-        "-I./srv",
+        "-I./worker",
         "-I./mtxsolver",
         "-I./aux",
-        "./aux/*.cpp",
-        "./srv/*.cpp",
+        "-I./and_net/and_net1",
+        "-I./and_net/and_net3",
+        "./worker/*.cpp",
         "./mtxsolver/*.cpp",
+        "./and_net/and_net1/*.cpp",
+        "./and_net/and_net3/*.cpp",
         "-o",
-        "./bin/mtx_server_dbg",
+        "./bin/mtx_worker_dbg",
         "-lboost_filesystem",
-        "-lpthread"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [
+        "$gcc"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "detail": "mtx server dbg"
+      "detail": "mtx worker dbg"
     },
+    // mtx WORKER release compile
+    {
+      "type": "shell",
+      "label": "task_MtxWorkerCompile_release",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-O3",
+        "-I./worker",
+        "-I./mtxsolver",
+        "-I./aux",
+        "-I./and_net/and_net1",
+        "-I./and_net/and_net3",
+        "./worker/*.cpp",
+        "./mtxsolver/*.cpp",
+        "./and_net/and_net1/*.cpp",
+        "./and_net/and_net3/*.cpp",
+        "-o",
+        "./bin/mtx_worker_release",
+        "-lboost_filesystem",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "mtx worker release"
+    },
+
     // mtx CLIENT debug compile
     {
       "type": "shell",
@@ -106,10 +118,12 @@
         "-std=c++11",
         // "-O2",
         "-g",
+        "-I./and_net/and_net1",
         "-I./client",
         "-I./mtxsolver",
         "-I./aux",
-        "./aux/*.cpp",
+        "./and_net/and_net1/*.cpp",
+        // "./aux/*.cpp",
         "./client/*.cpp",
         "./mtxsolver/*.cpp",
         "-o",
@@ -120,13 +134,53 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [
+        "$gcc"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "detail": "mtx client dbg"
     },
+
+    // mtx SERVER debug compile
+    {
+      "type": "shell",
+      "label": "task_MtxServerCompile_dbg",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-g",
+
+        "-I./and_net/and_net1",
+        "-I./srv",
+        "-I./mtxsolver",
+        "-I./aux",
+
+        "./and_net/and_net1/*.cpp",
+        "./srv/*.cpp",
+        "./mtxsolver/*.cpp",
+
+        "-o",
+        "./bin/mtx_server_dbg",
+        "-lboost_filesystem"
+        // "-lpthread"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "mtx client dbg"
+    },
+
     // MTX generator compile DBG
     {
       "type": "shell",
@@ -136,9 +190,13 @@
         "-Wall",
         "-std=c++11",
         "-g",
-        // "-I./mtxsolver",
+        "-I./and_net/and_net1",
+        // "-I./and_net/and_net3",
         "-I./aux",
-        "./aux/*.cpp",
+        "-I./mtxsolver",
+        // "./aux/*.cpp",
+        "./and_net/and_net1/*.cpp",
+        // "./and_net/and_net3/*.cpp",
         "./mtxsolver/*.cpp",
         "./generator/*.cpp",
         "-o",
@@ -148,12 +206,134 @@
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "problemMatcher": ["$gcc"],
+      "problemMatcher": [
+        "$gcc"
+      ],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "detail": "mtx client dbg"
+    },
+
+    // test and_net2 compile DBG=============================
+    {
+      "type": "shell",
+      "label": "task_test-and_net2_dbg",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-g",
+        // "-O2",
+        "-I./and_net2",
+        "-I./aux",
+        "./and_net2/*.cpp",
+        "./test-and_net/*.cpp",
+        "-o",
+        "./bin/test-and_net2_dbg",
+        "-lboost_filesystem",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "and_net test DEBUG"
+    },
+
+    // test and_net2 compile RELEASE =============================
+    {
+      "type": "shell",
+      "label": "task_test-and_net2_release",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-O2",
+        "-I./and_net2",
+        "-I./aux",
+        "./and_net2/*.cpp",
+        "./test-and_net2/*.cpp",
+        "-o",
+        "./bin/test-and_net2_release",
+        // "-lboost_filesystem",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "and_net2 test RELEASE"
+    },
+
+    // test and_net3 compile DBG=============================
+    {
+      "type": "shell",
+      "label": "task_test-and_net3_dbg",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-g",
+        "-I./and_net/and_net3",
+        "-I./aux",
+        "./and_net/and_net3/*.cpp",
+        "./test/test-and_net3/*.cpp",
+        "-o",
+        "./bin/test-and_net3_dbg",
+        // "-lboost_filesystem",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "and_net3 test DEBUG"
+    },
+    // test and_net3 compile RELEASE =============================
+    {
+      "type": "shell",
+      "label": "task_test-and_net3_release",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-Wall",
+        "-std=c++11",
+        "-O2",
+        "-I./and_net/and_net3",
+        "-I./aux",
+        "./and_net/and_net3/*.cpp",
+        "./test/test-and_net3/*.cpp",
+        "-o",
+        "./bin/test-and_net3_release",
+        // "-lboost_filesystem",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "and_net3 test RELEASE"
     }
   ]
 }
