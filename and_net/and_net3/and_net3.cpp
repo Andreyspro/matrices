@@ -59,6 +59,8 @@ size_t net_three::move_tail()
 	return to_move_bytes;
 }
 
+
+
 std::string net_three::remains_str()
 {
 	std::string result_str;
@@ -69,6 +71,96 @@ std::string net_three::remains_str()
 bool net_three::is_EOS() const
 {
 	return m_EOS;
+}
+
+std::string net_three::read_str(size_t to_read_size)
+{
+	size_t bytes = 0;
+	system::error_code err_code;
+
+	while (to_read_size > unreaded_size())
+	{
+		if ((ssize_t)to_read_size > std::distance(m_get_pos, m_data.end()))
+		{
+			if (to_read_size > m_max_buf_size)
+			{
+				throw errors::msg_longer_buffer();
+			}
+			move_tail();
+		}
+		if (m_EOF_reached) 
+		{
+			throw errors::last_msg_shorter();
+		}
+		bytes = m_sock->read_some(buffer(&(*m_ins_pos), free_size()), err_code);
+		m_ins_pos += bytes;
+		if (err_code.value())
+		{
+			if (err_code == asio::error::eof)
+			{
+				m_EOF_reached = true;
+			} else {
+				throw system::system_error(err_code);
+			}
+		}
+	}
+	std::string out(static_cast<char*>(&(*m_get_pos)), to_read_size);
+	m_get_pos += to_read_size;
+	m_EOS = (m_EOF_reached && unreaded_size() == 0);
+	return out;
+}
+
+std::string net_three::read_str(std::string end_marker)
+{
+	size_t bytes;
+	std::vector<char>::iterator search_pos;
+	system::error_code err_code;
+
+	while (true) 
+	{
+		search_pos = std::search(m_get_pos, m_ins_pos, end_marker.cbegin(), 
+			end_marker.cend());
+		// if end marker is finded break the loop
+		if (search_pos < m_ins_pos)
+		{
+			break; //end while loop
+		}
+		
+		// if end marker is not found, do following
+
+		// chek that EOF not reached
+		if (m_EOF_reached){
+			// EOF reached and end market was not founded
+			throw errors::last_msg_no_EM();
+		}
+
+		// check that the tail is empty and buffer has data
+		if (m_get_pos > m_mid_pos)
+		{
+			move_tail();
+		}
+
+		if (free_size() == 0) {
+			throw errors::no_EM_buffer_overflowing();
+		}
+		bytes = m_sock->read_some(buffer(&(*m_ins_pos), free_size()), err_code);
+		m_ins_pos += bytes;
+		// }
+		if (err_code.value() != 0)
+		{
+			if (err_code == asio::error::eof)
+			{
+				m_EOF_reached = true;
+			} else {
+				throw system::system_error(err_code);
+			}
+		}
+	}
+	size_t result_size = std::distance(m_get_pos, search_pos);
+	std::string result_string(static_cast<char*>(&(*m_get_pos)), result_size);
+	m_get_pos = search_pos + end_marker.length();
+	m_EOS = (m_get_pos == m_ins_pos && m_EOF_reached);
+	return result_string;
 }
 
 result_read_str_t net_three::try_read_str(size_t to_read_size)
@@ -194,5 +286,35 @@ size_t net_three::get_net_data()
 	}
 	return bytes;
 }
+
+namespace errors
+{
+
+and_net_exception::and_net_exception(std::string err_str)
+	: std::runtime_error(err_str)
+{
+}
+
+last_msg_no_EM::last_msg_no_EM()
+	: and_net_exception("Cant find end marker in the remaining message.")
+{
+}
+
+last_msg_shorter::last_msg_shorter()
+	: and_net_exception("The last message is shorter that required.")
+{
+}
+
+no_EM_buffer_overflowing::no_EM_buffer_overflowing()
+	: and_net_exception("EM not found in all overflowing buffer.")
+{
+}
+
+msg_longer_buffer::msg_longer_buffer()
+	: and_net_exception("Requested message longer that buffer size.")
+{
+}
+
+} //end namespace errors
 
 } // end namespace and_net

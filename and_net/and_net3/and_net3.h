@@ -78,6 +78,8 @@ public:
 	std::string remains_str();
 	bool is_EOS() const;
 
+	std::string read_str(size_t to_read_size = 1);
+	std::string read_str(std::string end_marker = "\r\n");
 	size_t get_net_data();
 	result_read_str_t try_read_str(size_t);
 	op_read_status_t try_read_str_sz(std::string &, size_t);
@@ -107,8 +109,40 @@ private:
 	// on_read_str_f_t m_on_read_str_callback;
 };
 
+namespace errors
+{
 
+class and_net_exception : public std::runtime_error
+{
+public:
+	and_net_exception(std::string err_str);
+};
 
+class last_msg_no_EM : public and_net_exception
+{
+public:
+	last_msg_no_EM();
+};
+
+class no_EM_buffer_overflowing: public and_net_exception
+{
+public:
+	no_EM_buffer_overflowing();
+};
+
+class last_msg_shorter : public and_net_exception
+{
+public:
+	last_msg_shorter();
+};
+
+class msg_longer_buffer : public and_net_exception
+{
+public:
+	msg_longer_buffer();
+};
+
+} //end namespace errors
 
 } //end namespace and
 
