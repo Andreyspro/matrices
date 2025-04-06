@@ -1,6 +1,6 @@
-#include <iomanip>
+// #include <iomanip>
 #include <iostream>
-#include <stdexcept>
+// #include <stdexcept>
 #include <string>
 #include <functional>
 #include <thread>
@@ -69,8 +69,8 @@ void client_works2(const std::string &mtx_file_name) {
 		ip::tcp::socket sock(service);
 		sock.connect(ep);
 		std::cout << "Connecting ok \n";
-		write(sock, buffer(std::string(MTX_NET_HEADER_HELLO) + "\r\n"));
-		write(sock, buffer(std::string(MTX_NET_CMD_RECEIVE_MTX_AND_CALC) + "\r\n"));
+		write(sock, buffer(std::string(MTX_NET_HEADER_HELLO) + "\n"));
+		write(sock, buffer(std::string(MTX_NET_CMD_RECEIVE_MTX_AND_CALC) + "\n"));
 		std::cout << "Send matrix \n";
 
 		while (byte_remain)
@@ -114,7 +114,7 @@ void callback_nego(nego_operation_t op, std::shared_ptr<and_net::net_three> net_
 
 	if (op == READ_HELLO_HEADER)
 	{
-		read_status = net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			mtx::version_t mtx_version = mtx::parse_net_hello(read_str);
@@ -133,7 +133,7 @@ void callback_nego(nego_operation_t op, std::shared_ptr<and_net::net_three> net_
 
 	if (op == READ_COMMAND)
 	{
-		read_status = net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			if (read_str == MTX_NET_CMD_RECEIVE_MTX_AND_CALC)
@@ -271,7 +271,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
 	// Check thrid agrument net mtx_file_name
 	if (argc >= 3) {
 		mtx_file_path = argv[2];
@@ -294,7 +293,6 @@ int main(int argc, char *argv[])
 		exit(1);
 
 	}
-
 	
 	if (start_mode == 1)
 	{
@@ -305,6 +303,10 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "Run as server! Buff size = " << net_buff_size_kb << "kb.\n";
 		server_works(net_buff_size_kb * 1024);
+	}
+	else
+	{
+		std::cout << "Start mode (arg1) not specified.\n";
 	}
 
 	std::cout << "Main end. \n";
