@@ -47,7 +47,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 	std::string read_str;
 	if (m_stage == LOAD_TYPE)
 	{
-		read_status = m_net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = m_net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			#ifdef EXTRAOUT
@@ -60,7 +60,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 
 	if (m_stage == LOAD_VERSION)
 	{
-		read_status = m_net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = m_net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			#ifdef EXTRAOUT
@@ -73,7 +73,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 
 	if (m_stage == LOAD_SUBVERSION)
 	{
-		read_status = m_net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = m_net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			#ifdef EXTRAOUT
@@ -86,7 +86,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 
 	if (m_stage == LOAD_SIZE)
 	{
-		read_status = m_net_ptr->try_read_str_em(read_str, "\r\n");
+		read_status = m_net_ptr->try_read_str_em(read_str, "\n");
 		if (read_status.read_result == and_net::READ_OK)
 		{
 			#ifdef EXTRAOUT
@@ -106,7 +106,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 		while 
 		(
 			m_stage == LOAD_MTX_ELEMENTS &&
-			(read_status = m_net_ptr->try_read_str_em(read_str, "\r\n")).read_result == and_net::READ_OK
+			(read_status = m_net_ptr->try_read_str_em(read_str, "\n")).read_result == and_net::READ_OK
 		)
 		{
 			#ifdef EXTRAOUT
