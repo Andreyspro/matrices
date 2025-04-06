@@ -6,7 +6,8 @@
 #include "boost/asio.hpp"
 #include "mtxsolver.h"
 #include "mtxaux.h"
-#include "and_net.h"
+// #include "and_net.h"
+#include "and_net3.h"
 
 #define EXTRAOUT
 
@@ -19,13 +20,14 @@ size_t verbosity = 2;
 
 void handle_connection(tcp::socket &sock, const std::string &answer_file_path)
 {
-	and_net::net_one net1(&sock);
-	mtx::version_t client_hello_version = mtx::parse_net_hello(net1.read_str("\n"));
+	// and_net::net_one net1(&sock);
+	and_net::net_three::ptr_t net1 = and_net::net_three::get_new(&sock, 1024);
+	mtx::version_t client_hello_version = mtx::parse_net_hello(net1->read_str("\n"));
 	if (client_hello_version > mtx::MTX_NET_SUPPORTED_VER)
 	{
 		throw (std::runtime_error("Client version not supported"));
 	}
-	std::string command = net1.read_str("\n");
+	std::string command = net1->read_str("\n");
 	if (command == MTX_NET_CMD_RECEIVE_MTX_AND_CALC) {
 		MtxSolver mtx;
 		#ifdef EXTRAOUT
