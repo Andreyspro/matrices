@@ -6,10 +6,9 @@
 #include <string>
 
 #include "boost/filesystem.hpp"
-#include "boost/algorithm/string.hpp"
 
 #include "mtxsolver.h"
-#include "and_net.h"
+#include "and_net3.h"
 
 namespace fs = boost::filesystem;
 namespace net = boost::asio;
@@ -145,18 +144,19 @@ void MtxSolver::LoadFromFileStream(std::istream &imtxstream, const std::string n
 	}
 }
 
-void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
+// void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
+void MtxSolver::LoadFromNet(and_net::net_three::ptr_t net_connection, std::string name)
 {
 	#ifdef EXTRAOUT
 	std::cout << "Start load from NET start\n";
 	#endif
 	std::string cur_type, cur_version, cur_subversion;
-	cur_type = net_connection.read_str("\n");
+	cur_type = net_connection->read_str("\n");
 	if (cur_type != mtx::supported_data_header.type)
 		throw std::runtime_error("Current mtx type not supported. Incorrect type");
 	
-	cur_version = net_connection.read_str("\n");
-	cur_subversion = net_connection.read_str("\n");
+	cur_version = net_connection->read_str("\n");
+	cur_subversion = net_connection->read_str("\n");
 	if (!mtx::data_is_supported(cur_version, cur_subversion))
 		throw std::runtime_error("Current mtx not supported. Incorrect version");
 
@@ -164,14 +164,14 @@ void MtxSolver::LoadFromNet(and_net::net_one &net_connection, std::string name)
 	#ifdef EXTRAOUT
 	std::cout << "Readed version " << cur_type << "." << cur_version "." << cur_subversion << "\n";
 	#endif
-	size = stoi(net_connection.read_str("\n"));
+	size = stoi(net_connection->read_str("\n"));
 	Mtx.reserve(size);
 	for (size_t i = 0; i < size; i++)
 	{
 		Mtx.emplace_back(size + 1);
 		for (size_t j = 0; j <= size; j++)
 		{
-			Mtx[i][j] = stod(net_connection.read_str("\n"));
+			Mtx[i][j] = std::stod(net_connection->read_str("\n"));
 		}
 	}
 	#ifdef EXTRAOUT
