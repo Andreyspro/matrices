@@ -114,6 +114,7 @@ void mtxsolver_async_loader::on_read_mtx(and_net::op_fill_status_t fill_status)
 			
 				"][" << m_load_index.j << "] = " << read_str << std::endl;
 			#endif
+			// stod - is CPU very expensive operation !
 			Mtx[m_load_index.i][m_load_index.j] = std::stod(read_str);
 
 			if (m_load_index.j < size)

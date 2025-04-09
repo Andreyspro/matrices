@@ -14,10 +14,14 @@ class mtxsolver_async_loader :
     public std::enable_shared_from_this<mtxsolver_async_loader>,
 	public MtxSolver
 {
-
-	//default constructor is deleted
+	//default, copy constructor is deleted
     mtxsolver_async_loader() = delete; 
-    // bas constructor is hidden
+	mtxsolver_async_loader(const mtxsolver_async_loader &source) = delete;
+
+	// copy assign operator is deleted
+	const mtxsolver_async_loader& operator=(const mtxsolver_async_loader&) = delete;
+
+    // base constructor is hidden
 	mtxsolver_async_loader(std::shared_ptr<and_net::net_three> net_ptr);
 
 public:
