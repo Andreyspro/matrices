@@ -10,6 +10,9 @@
 
 using namespace boost::asio;
 
+#define MTX_ASYNC_SOLVER_EXTRAOUT
+#undef MTX_ASYNC_SOLVER_EXTRAOUT
+
 class mtxsolver_async_loader : 
     public std::enable_shared_from_this<mtxsolver_async_loader>,
 	public MtxSolver
@@ -32,11 +35,13 @@ public:
 	// 2 arg - size of matrix
 	typedef std::function<void(bool, size_t, self_ptr_t)> callback_t;
 
-    static self_ptr_t get_new(std::shared_ptr<and_net::net_three> &net);
+    static self_ptr_t get_new(std::shared_ptr<and_net::net_three> net);
     void start(callback_t);
+	~mtxsolver_async_loader();
 private:
     void do_read_mtx();
     void on_read_mtx(and_net::op_fill_status_t);
+
 	std::shared_ptr<and_net::net_three> m_net_ptr;
     callback_t m_callback;
 	enum stage_t
@@ -55,6 +60,9 @@ private:
 	} m_load_index;
 	size_t m_invokes = 0; // experemental data
 	std::string m_element; // experemental data
+	#ifdef MTX_ASYNC_SOLVER_EXTRAOUT
+	std::string m_id;
+	#endif
 };
 
 #endif // #ifndef MTXSOLVER_ASYNC 

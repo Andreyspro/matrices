@@ -1,11 +1,11 @@
 {
     "configurations": [
-        // Solver multithread
+        // Classic multithread Solver multithread DEBUG
         {
-            "name": "MtxSolverCompileRun_dbg",
+            "name": "MtxSolver_mt3_CompileRun_dbg",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/mtx_solver_dbg",
+            "program": "${workspaceFolder}/bin/mtx_solver_mt3_dbg",
             "args": [
                 "/home/andreys/dev_example_data/mtxs/",
                 "/home/andreys/dev_example_data/answers/"
@@ -13,7 +13,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": true,
+            "externalConsole": false,
             "MIMode": "gdb",
             "miDebuggerPath": "gdb",
             "setupCommands": [
@@ -23,17 +23,44 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "task_MtxSolverCompile_dbg"
+            "preLaunchTask": "task_MtxSolverCompileMT3_dbg"
         },
 
-        // MTX WORKER DBG
+        // Classic multithread Solver multithread RELEASE
         {
-            "name": "MtxWorkerCompileRun_dbg",
+            "name": "MtxSolver_mt3_CompileRun_release",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_solver_mt3_release",
+            "args": [
+                "/home/andreys/dev_example_data/mtxs/",
+                "/home/andreys/dev_example_data/answers/"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_MtxSolverCompileMT3_release"
+        },
+
+		// MTX WORKER Server DBG ==================
+        {
+            "name": "mtx_worker_server_run_dbg",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_worker_dbg",
             "args": [
-                "2"
+                "server",
+				"/home/andreys/dev_example_data/mtxs/answers"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -48,20 +75,18 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "task_MtxWorkerCompile_dbg"
+            // "preLaunchTask": "task_MtxWorkerCompile_dbg"
         },
-
-
-        // MTX WORKER release
+		// MTX WORKER client DBG ==================
         {
-            "name": "MtxWorkerCompileRun_release",
+            "name": "mtx_worker_client_run_dbg",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/mtx_worker_release",
+            "program": "${workspaceFolder}/bin/mtx_worker_dbg",
             "args": [
-                "2",
-                "__",
-                "8"
+                "client",
+				"/home/andreys/dev_example_data/mtxs/2500-1/",
+				"127.0.0.1"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -76,10 +101,10 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "task_MtxWorkerCompile_release"
+            // "preLaunchTask": "task_MtxWorkerCompile_dbg"
         },
 
-        // MTX server compile DBG ==========================================
+		// MTX server compile DBG ==========================================
         {
             "name": "MtxServerCompileRun_dbg",
             "type": "cppdbg",
@@ -129,9 +154,9 @@
             "preLaunchTask": "task_MtxClientCompile_dbg"
         },
 
-        // Generator ==================================
+        // Mtx Generator DBG ==================================
         {
-            "name": "generator_dbg",
+            "name": "MTX_generetor_DBG",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/mtx_generator_dbg",
@@ -152,6 +177,31 @@
                 }
             ],
             "preLaunchTask": "task_mtxgnerator_dbg"
+        },
+
+        // Mtx Generator RELEASE ==================================
+        {
+            "name": "MTX_generetor_RELEASE",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/mtx_generator_release",
+            "args": [
+                "/home/andreys/dev_example_data/mtxs/"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "task_mtxgnerator_release"
         },
 
         // TEST AND_NET2 SERVER DEBUG===================================

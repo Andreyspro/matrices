@@ -11,6 +11,8 @@
 
 
 using namespace boost::asio;
+#define AND_NET3_EXTRAOUT
+#undef AND_NET3_EXTRAOUT
 
 namespace and_net
 {
@@ -50,9 +52,14 @@ enum status_fill_reason_t
 
 struct op_fill_status_t
 {
-	 status_fill_t fill_result = FILL_OK;
-	 status_fill_reason_t reason = FILL_NO_ERROR;
+	 status_fill_t fill_result;
+	 status_fill_reason_t reason;
 };
+// struct op_fill_status_t
+// {
+// 	 status_fill_t fill_result = FILL_OK;
+// 	 status_fill_reason_t reason = FILL_NO_ERROR;
+// };
 
 typedef std::pair<std::string, op_read_status_t> result_read_str_t;
 
@@ -90,7 +97,7 @@ public:
 	void cleancallback();
 
 private:
-	void on_fill_data(const boost::system::error_code &, size_t bytes);
+	void on_fill_data(on_fill_buff_callback_t, const boost::system::error_code &, size_t bytes);
 	size_t unreaded_size() const;
 	size_t free_size() const;
 	size_t move_tail();
@@ -102,7 +109,9 @@ private:
 		m_ins_pos, m_mid_pos, m_end_pos;
 	bool m_EOF_reached;
 	bool m_EOS; // end of service
-
+	#ifdef AND_NET3_EXTRAOUT
+	std::string m_id;
+	#endif
 	// async section=======================================
 	on_fill_buff_callback_t m_fill_callback;
 	// size_t m_to_read_size;

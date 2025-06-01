@@ -12,7 +12,7 @@ class perf_timer
 public:
 	perf_timer();
 	perf_timer(perf_timer<duration_t>& ) = delete;
-	perf_timer<duration_t> operator=(perf_timer<duration_t>&) = delete;
+	perf_timer<duration_t> operator=(const perf_timer<duration_t>&) = delete;
 	void restart();
 	void stop();
 	void resume();

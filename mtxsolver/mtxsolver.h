@@ -30,6 +30,8 @@ public:
 	void SendToNet(tcp::socket &sock);
 	void SaveToFile(const std::string &FileName) const;
 	void SaveToStream(std::ostream &omtxstream) const;
+	std::string get_name() const;
+	void set_name(std::string new_name);
 	size_t getSize() const;
 	std::string GetMtxName() const;
 	MtxElement getAnswers(size_t index) const;

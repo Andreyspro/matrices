@@ -2,10 +2,9 @@
 #include <iterator>
 #include <stdexcept>
 #include <boost/asio.hpp>
-// #include "uuid.h"
 #include "and_net3.h"
+#include "uuid.h"
 
-#define NOEXTRAOUT
 
 using namespace boost;
 
@@ -16,6 +15,11 @@ net_three::net_three(ip::tcp::socket *sock, size_t size)
 	: m_sock(sock), m_data(size * 2),m_max_buf_size(size),
 	m_EOF_reached(false), m_EOS(false)
 {
+	#ifdef AND_NET3_EXTRAOUT
+	m_id = new_uuid();
+	std::string prefix = "net_three (" + m_id + ") net_three. ";
+	std::cout << prefix << "CTOR." << std::endl;
+	#endif
 	// BUFFER
 	// > tail data space <---- |m_mid_pos| ----> main data space <
 	// m_data.resize(size * 2);
@@ -34,6 +38,10 @@ net_three::ptr_t net_three::get_ptr()
 
 net_three::~net_three()
 {
+	#ifdef AND_NET3_EXTRAOUT
+	std::string prefix = "net_three (" + m_id + ") ~net_three. ";
+	std::cout << prefix << "DTOR." << std::endl;
+	#endif
 }
 
 size_t net_three::unreaded_size() const
@@ -229,7 +237,7 @@ op_read_status_t net_three::try_read_str_em(std::string & result_str, const std:
 
 void net_three::async_fill_buff(on_fill_buff_callback_t fill_callback)
 {
-	m_fill_callback = fill_callback;
+	// m_fill_callback = fill_callback;
 	move_tail();
 	m_sock->async_read_some
 	(
@@ -237,6 +245,7 @@ void net_three::async_fill_buff(on_fill_buff_callback_t fill_callback)
 		std::bind
 		(
 			&net_three::on_fill_data, shared_from_this(),
+			fill_callback,
 			std::placeholders::_1, std::placeholders::_2
 		)
 	);
@@ -247,12 +256,13 @@ void net_three::cleancallback()
 	m_fill_callback = NULL;
 }
 
-void net_three::on_fill_data(const system::error_code &err, size_t bytes)
+void net_three::on_fill_data(on_fill_buff_callback_t fill_callback,
+		const boost::system::error_code &err, size_t bytes)
 {
-	#ifdef EXTRAOUT
+	#ifdef AND_NET3_EXTRAOUT2
 	std::cout << "++" << shared_from_this().use_count() << std::endl;
 	#endif
-	op_fill_status_t status;
+	op_fill_status_t status{and_net::FILL_OK, and_net::FILL_NO_ERROR};
 	m_ins_pos += bytes;
 	if (err.value()) {
 		if (err == asio::error::eof)
@@ -261,12 +271,17 @@ void net_three::on_fill_data(const system::error_code &err, size_t bytes)
 		} 
 		else
 		{
+			#ifdef AND_NET3_EXTRAOUT
+			std::string prefix = "net_three (" + m_id + ") on_fill_data. ";
+			std::cout << prefix << "Error code - '" << err.value()
+				<< "',error message - '" << err.message() << "'" << std::endl;
+			#endif
 			status.fill_result = FILL_FAILED;
 			status.reason = FILL_NET_ERROR;
 		}
 	}
 	// m_fill_callback(shared_from_this(), status);
-	m_fill_callback(status);
+	fill_callback(status);
 
 }
 

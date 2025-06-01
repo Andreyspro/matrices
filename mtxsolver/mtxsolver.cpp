@@ -10,6 +10,8 @@
 #include "mtxsolver.h"
 #include "and_net3.h"
 
+#undef EXTRAOUT
+
 namespace fs = boost::filesystem;
 namespace net = boost::asio;
 using tcp = net::ip::tcp;
@@ -162,7 +164,7 @@ void MtxSolver::LoadFromNet(and_net::net_three::ptr_t net_connection, std::strin
 
 
 	#ifdef EXTRAOUT
-	std::cout << "Readed version " << cur_type << "." << cur_version "." << cur_subversion << "\n";
+	std::cout << "Readed version " << cur_type << "." << cur_version << "." << cur_subversion << "\n";
 	#endif
 	size = stoi(net_connection->read_str("\n"));
 	Mtx.reserve(size);
@@ -221,7 +223,16 @@ void MtxSolver::SaveToStream(std::ostream &omtxstream) const
 			}
 		}
 	}
-}	
+}
+std::string MtxSolver::get_name() const
+{
+	return m_mtx_name;
+}
+
+void MtxSolver::set_name(std::string new_name)
+{
+	m_mtx_name = new_name;
+}
 
 size_t MtxSolver::getSize() const
 {

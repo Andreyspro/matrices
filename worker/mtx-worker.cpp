@@ -1,24 +1,33 @@
-// #include <iomanip>
 #include <iostream>
+#include <iomanip>
 // #include <stdexcept>
 #include <string>
 #include <functional>
 #include <thread>
 #include <fstream>
+#include <boost/filesystem.hpp>
 
 #include "boost/asio.hpp"
 #include "mtxsolver.h"
 #include "mtxsolver_async.h"
+#include "mtx_net_handler.h"
 #include "mtxaux.h"
 #include "and_net3.h"
 #include "perf_timer.h"
+#include "uuid.h" 
+#include "queuemt.h"
 
-#define noEXTRAOUT
+#define EXTRAOUT
 
 namespace net = boost::asio;
 using tcp = net::ip::tcp;
 
-// namespace fs = boost::filesystem;
+size_t save_thread_num = 1;
+size_t solve_thread_num = 1;
+queuemt<MtxSolver> mtx_q_to_solve(50);
+queuemt<MtxSolver> mtx_q_to_save;
+
+std::atomic<size_t> recieved_mtx(0);
 
 size_t verbosity = 2;
 
@@ -89,228 +98,306 @@ void client_works2(const std::string &mtx_file_name) {
 		std::cerr << "Error: " << ex.what() << std::endl;
 	}
 	std::cout << "End client !\n";
+}
+
+void client_works3(const size_t buff_size, const std::string &mtx_dir, const std::string ip_addr) {
+	using namespace boost::asio;
+	namespace fs = boost::filesystem;
+	std::cout << "Start client !\n";
+	// fs::path mtx_path(mtx_dir);
+	if (!fs::exists(mtx_dir))
+	{
+		std::cout << "Directory  " << mtx_dir << " is not exist." << std::endl;
+		exit(1);
+	}
+	std::vector<fs::path> mtx_paths;
+	for (auto const &dir_element : fs::directory_iterator(mtx_dir))
+	{
+		if (dir_element.is_regular_file() && dir_element.path().extension() == ".mtx")
+		{
+			// std::cout << "Add '" << dir_element.path().filename() << "'" << std::endl;
+			mtx_paths.push_back(dir_element.path());
+		}
+	}
+	std::cout << "Found " << mtx_paths.size() << " .mtx files." << std::endl;
+	io_service service;
+	ip::tcp::endpoint ep(ip::address::from_string(ip_addr), mtx::def_ip_port);
+	size_t num = 1;
+	for (auto const &mtx_path : mtx_paths)
+	{
+		std::cout << "File " << num << " from " << mtx_paths.size() <<  "\n";
+		try 
+		{
+			std::cout << "client binary mode. file - " << mtx_path.filename() <<  "\n"; 
+			std::ifstream data_file(mtx_path.c_str(),  std::ios::binary);
+			// const size_t buff_size = 2048; 
+			// char buff[buff_size];
+			std::vector<char> buff(buff_size);
+			data_file.seekg(0, std::ios_base::end);
+			auto file_size = data_file.tellg();
+			size_t to_send_sz;
+			size_t byte_remain = file_size;
+			data_file.seekg(0, std::ios_base::beg);
+
+			std::cout << "Connecting...\n";
+			ip::tcp::socket sock(service);
+			sock.connect(ep);
+			perf_timer<std::chrono::microseconds> pt1;
+			std::cout << "Connecting ok \n";
+			write(sock, buffer(std::string(MTX_NET_HEADER_HELLO) + "\n"));
+			write(sock, buffer(std::string(MTX_NET_CMD_RECEIVE_MTX_AND_CALC) + "\n"));
+			std::cout << "Send matrix \n";
+
+			while (byte_remain)
+			{
+				to_send_sz = buff_size < byte_remain ? buff_size : byte_remain;
+				data_file.read(buff.data(), to_send_sz);
+				boost::asio::write(sock, buffer(buff, to_send_sz));
+				byte_remain -= to_send_sz;
+			}
+			pt1.stop();
+			double speed_mb_sec = pt1.get_duration() 
+				? static_cast<double>(file_size) / static_cast<double>(pt1.get_duration()) * 1000000 / 1024 / 1024
+				: 99999999;
+
+			std::cout << "Send matrix " << mtx_path.generic_string() << " in binary mode done. " 
+				<< std::setprecision(4) << std::fixed 
+				<< static_cast<double>(file_size) / 1024 / 1024 << " MB in " 
+				<< static_cast<double>(pt1.get_duration()) / 1000000 << " sec. Speed "
+				 << speed_mb_sec << " MB/sec." << std::endl;
+			sock.close();
+		}
+		catch (const std::runtime_error &ex)
+		{
+			std::cerr << "Error: " << ex.what() << std::endl;
+		}
+		num++;
+	}
+	std::cout << "End client !\n";
 }	
 
-enum nego_operation_t
+// predefine
+void mtx_load_ready(MtxSolver mtx);
+
+void handle_accept3(net::io_service &service, tcp::acceptor &acceptor, 
+	mtx::mtx_net_handler::ptr_t mtx_handler, const boost::system::error_code &err)
 {
-	READ_HELLO_HEADER = 0,
-	READ_COMMAND = 1,
-	LOAD_MTX = 2
-};
-
-// predeclare function
-void on_load_mtx(bool, bool, mtxsolver_async_loader::self_ptr_t);
-void do_load_mtx(std::shared_ptr<and_net::net_three>);
-
-void callback_nego(nego_operation_t op, std::shared_ptr<and_net::net_three> net_ptr, and_net::op_fill_status_t fill_status)
-{
-	std::string read_str;
-	and_net::op_read_status_t read_status;
-	if (fill_status.fill_result != and_net::FILL_OK)
-	{
-		std::cout << "callback_nego. FILL ERROR." << std::endl;
-		return;
-	}
-
-	if (op == READ_HELLO_HEADER)
-	{
-		read_status = net_ptr->try_read_str_em(read_str, "\n");
-		if (read_status.read_result == and_net::READ_OK)
-		{
-			mtx::version_t mtx_version = mtx::parse_net_hello(read_str);
-			if (mtx_version > 0 && mtx_version <= mtx::MTX_NET_SUPPORTED_VER)
-			{
-				std::cout << "callback_nego. HELLO header is OK." << std::endl;
-				op = READ_COMMAND;
-			}
-			else
-			{
-				std::cout << "callback_nego. NET HELLO NOT SUPPORTED." << std::endl;
-				return;
-			}
-		}
-	}
-
-	if (op == READ_COMMAND)
-	{
-		read_status = net_ptr->try_read_str_em(read_str, "\n");
-		if (read_status.read_result == and_net::READ_OK)
-		{
-			if (read_str == MTX_NET_CMD_RECEIVE_MTX_AND_CALC)
-			{
-				op = LOAD_MTX;
-				std::cout << "callback_nego. Command recieved - MTX_NET_CMD_RECEIVE_MTX_AND_CALC." << std::endl;
-			}
-			else
-			{
-				std::cout << "callback_nego. NET COMMAND NOT SUPPORTED." << std::endl;
-				return;
-			}
-		}
-	}
-
-
-	if (op < LOAD_MTX &&
-		read_status.read_result == and_net::READ_FAILED &&
-		read_status.reason == and_net::NEED_MORE_DATA
-	)
-	{
-		std::cout << "callback_nego. read more data." << std::endl;
-		net_ptr->async_fill_buff
-		(
-			std::bind
-			(
-				callback_nego,
-				op,
-				net_ptr->get_ptr(),
-				std::placeholders::_1
-			)
-		);
-		return;
-	}
-
-	if (op == LOAD_MTX)
-	{
-
-		std::cout << "callback_nego. Do load mtx." << std::endl;
-		do_load_mtx(net_ptr->get_ptr());
-
-	}
-	else
-	{
-		std::cout << "callback_nego. nego error." << std::endl;
-		return;
-	}
+	#ifdef EXTRAOUT
+	std::string prefix = "handle_accept3 (" + new_uuid() + "). ";
+	std::cout << prefix << "Start handle mtx " << recieved_mtx.load() << std::endl;
+	std::cout << prefix << "Error code - '" << err.value()
+	<< "',error message - '" << err.message() << "'" << std::endl;
+	#endif
 	
-}
+	
+	#ifdef EXTRAOUT
+	std::cout << prefix << "start_handle_connection" << std::endl;
+	#endif
+	
+	mtx_handler->start_handle_connection(mtx_load_ready);
 
-void do_load_mtx(std::shared_ptr<and_net::net_three> net_ptr)
-{
-	// mtxsolver_async_loader m(net_ptr);
-	mtxsolver_async_loader::self_ptr_t mtxloader_ptr = mtxsolver_async_loader::get_new(net_ptr);
-	mtxloader_ptr->start(on_load_mtx);
-}
+	#ifdef EXTRAOUT
+	std::cout << prefix << "start_handle_connection started" << std::endl;
+	#endif
 
-void on_load_mtx(bool load_ok, bool mtx_size, mtxsolver_async_loader::self_ptr_t mtxloader_ptr)
-{
-	std::cout << "on_load_mtx. start calculating." << std::endl;
-	// do calc MTX
-}
-
-void handle_connection2(net::io_service &service, tcp::socket &sock, size_t buff_size)
-{
-	std::shared_ptr<and_net::net_three> net_ptr = and_net::net_three::get_new(&sock, buff_size);
-	mtxsolver_async_loader::self_ptr_t mtxloader_ptr = mtxsolver_async_loader::get_new(net_ptr);
-	service.post
+	mtx::mtx_net_handler::ptr_t new_mtx_handler = mtx::mtx_net_handler::new_instance(service);
+	
+	#ifdef EXTRAOUT
+	std::cout << prefix << "Start async_accept from " << std::endl;
+	#endif
+	// new_mtx_handler->get_socket().remote_endpoint().address().to_string()
+	acceptor.async_accept
 	(
+		new_mtx_handler->get_socket(),
 		std::bind
 		(
-			callback_nego,
-			READ_HELLO_HEADER,
-			net_ptr->get_ptr(),
-			and_net::op_fill_status_t{}
+			handle_accept3,
+			std::ref(service),
+			std::ref(acceptor),
+			new_mtx_handler,
+			std::placeholders::_1
 		)
 	);
-	service.run();
-} // handle_connection2()
-
-void server_works(size_t buff_size)
-{
-	// using namespace boost::asio;
-
-	std::cout << "Start server !\n";
-	try
-	{
-		// std::cout << "version -" << get_hello_version("         MTXSOLVER-HELLO,011.23.459##") << "\n";
-		net::ip::tcp::endpoint ep(tcp::v4(), mtx::def_ip_port);
-		net::io_service service;
-		tcp::acceptor acceptor(service, ep);
-		tcp::socket sock(service);
-		std::cout << "Wait for connections...\n";
-		acceptor.accept(sock);
-		std::cout << "Connection ok\n";
-		std::cout << "Start handle connection\n";
-		perf_timer<std::chrono::milliseconds> pt;
-		try
-		{
-			handle_connection2(service, sock, buff_size);
-		}
-		catch (std::runtime_error const &ex)
-		{
-			std::cout << "Error: " << ex.what() << "\n";
-		}
-		pt.stop();
-		std::cout << "From server_works: run duration - " << pt.get_duration() << " millisec." <<  std::endl;
-		std::cout << "Handle connection done\n";
-
-	}
-	catch(const std::exception& e)
-	{
-		std::cerr << e.what() << '\n';
-	}
 	
-	std::cout << "End server !\n";
+	#ifdef EXTRAOUT
+	std::cout << prefix << "End." << std::endl;
+	#endif
+
 }
+
+
+void mtx_load_ready(MtxSolver mtx)
+{
+	#ifdef EXTRAOUT
+	auto name = mtx.get_name();
+	std::cout << "Add matrix for solve -> " << name << std::endl;
+	#endif
+	mtx_q_to_solve.wait_and_push(std::move(mtx));
+	recieved_mtx++;
+	#ifdef EXTRAOUT
+	std::cout << "Adding matrix complete -> " << name << std::endl;
+	#endif
+}
+
+void solve_mtx(queuemt<MtxSolver> &q_to_solve, queuemt<MtxSolver> &q_to_save)
+{
+	MtxSolver temp_mtx;
+	#ifdef EXTRAOUT
+	std::cout << "solve_mtx: wait_and_pop." << std::endl;
+	#endif
+	while(q_to_solve.wait_and_pop(temp_mtx))
+	{
+		#ifdef EXTRAOUT
+		std::cout << "solve_mtx: mtx is dequeued -> " << temp_mtx.get_name() << ". " << "Start solve "<< std::endl;
+		std::cout << ">>>>> solve queue size is " << q_to_solve.size() << std::endl;
+		#endif
+		perf_timer<std::chrono::milliseconds> pt1;
+		temp_mtx.Solve();
+		pt1.stop();
+		#ifdef EXTRAOUT
+		std::cout << "solve_mtx: mtx is solved -> " << temp_mtx.get_name() << ". Solve time is " << pt1.get_duration()
+			<< " mSec. Dispath mtx for save answers." << std::endl;
+		#endif
+		temp_mtx.free();
+		auto name = temp_mtx.get_name();
+		q_to_save.wait_and_push(std::move(temp_mtx));
+		#ifdef EXTRAOUT
+		std::cout << "solve_mtx: mtx is dispathced to save -> " << name << std::endl;
+		#endif
+	}
+}
+
+void save_mtx(queuemt<MtxSolver> &q_to_save, std::string directory_to_save)
+{
+	MtxSolver temp_mtx;
+	#ifdef EXTRAOUT
+	std::cout << "save_mtx: wait_and_pop." << std::endl;
+	#endif
+	while(q_to_save.wait_and_pop(temp_mtx))
+	{
+		#ifdef EXTRAOUT
+		std::cout << "save_mtx: mtx is dequeued -> " << temp_mtx.get_name() << ". " << "Start save "<< std::endl;
+		std::cout << "save queue size is " << q_to_save.size() << std::endl;
+		#endif
+		boost::filesystem::path save_path;
+		save_path /= directory_to_save;
+		save_path /= temp_mtx.get_name() + ".ans";
+		temp_mtx.SaveAnswers(save_path.string());
+		#ifdef EXTRAOUT
+		std::cout << "save_mtx: mtx is saved -> " << temp_mtx.get_name() << std::endl;
+		#endif
+	}
+}
+
+void server_works3(size_t buff_size, std::string directory_to_save)
+{
+	std::vector<std::thread> mtx_solve_threads;
+	std::vector<std::thread> mtx_save_threads;
+
+	size_t solve_thread_num = std::thread::hardware_concurrency() >= 2 ? std::thread::hardware_concurrency() - 1 : 1;
+	for (size_t i = 0; i < solve_thread_num; i++)
+	{
+		mtx_solve_threads.push_back
+		(
+			std::thread(solve_mtx, std::ref(mtx_q_to_solve), std::ref(mtx_q_to_save))
+		);
+	}
+	for (size_t i = 0; i < save_thread_num; i++)
+	{
+		mtx_save_threads.push_back
+		(
+			std::thread(save_mtx, std::ref(mtx_q_to_save), directory_to_save)
+		);
+	}
+
+	net::ip::tcp::endpoint ep(tcp::v4(), mtx::def_ip_port);
+	net::io_service service;
+	tcp::acceptor acceptor(service, ep);
+	{
+	mtx::mtx_net_handler::ptr_t mtx_handler =  mtx::mtx_net_handler::new_instance(service);
+	#ifdef EXTRAOUT
+	std::cout << "server_works3. Wait for connection" << std::endl;
+	#endif
+	acceptor.async_accept
+	(
+		mtx_handler->get_socket(),
+		std::bind
+		(
+			handle_accept3,
+			std::ref(service),
+			std::ref(acceptor),
+			mtx_handler,
+			std::placeholders::_1
+		)
+	);
+	}
+	#ifdef EXTRAOUT
+	// std::cout << "server_works3. mtx_handler.use_count() " << mtx_handler.use_count() << std::endl;
+	std::cout << "server_works3. Start service RUN()" << std::endl;
+	#endif
+	service.run();
+	#ifdef EXTRAOUT
+	std::cout << "server_works3. End" << std::endl;
+	#endif
+
+}
+
 
 int main(int argc, char *argv[])
 {
 	std::cout << "Main start... \n";
-
-	// Check argumets 1 - client, 2 -server
-	char start_mode = 0; //default start_mode is 0 - nothing
-
-	size_t net_buff_size_kb = 8; //default 8kb
-	std::string mtx_file_path = "";
-	if (argc >= 2) {
-		try {
-			start_mode = std::stoi(std::string(argv[1]));
-		} catch (std::invalid_argument const& ex) 
-		{
-			std::cout << "Invalid argument-1 (start mode) !.\n";
-			exit(1);
-		}
-	}
-
-	// Check thrid agrument net mtx_file_name
-	if (argc >= 3) {
-		mtx_file_path = argv[2];
-	}
-
-	// Check second agrument net buffer size
-	if (argc >= 4) {
-		try {
-			net_buff_size_kb = std::stoi(std::string(argv[3]));
-		} catch (std::invalid_argument const& ex)
-		{
-			std::cout << "Invalid argument-3 net buffer size!\n";
-			exit(1);
-		}
-	}
-
-	if (start_mode == 1 && mtx_file_path == "")
-	{
-		std::cout << "Client mode. File not specified !\n";
-		exit(1);
-
-	}
+	// std::string s("312.123");
+	// double d = crack_atof::atof(&s.front(), &s.back());
+	// std::cout << std::setprecision(4) <<  std::fixed <<  d << "\n";
+	const size_t buff_size_kb = 8;
+	// Argument 1 - client
+	// Argument 2 - server
+	std::string start_mode = ""; //default start_mode is "" - nothing
+	start_mode = argc >= 2 ? argv[1] : "" ;
 	
-	if (start_mode == 1)
+	// Check second agrument net mtx_name
+	//For client its directory for load matrix for send to server
+	//For server its directory for save answers
+	std::string mtx_path = "";
+	mtx_path = argc >= 3 ? argv[2] : "" ;
+	
+	// Check 3 agrument ip addres for connetion
+	std::string ip_addr = "";
+	ip_addr = argc >= 4 ? argv[3] : "" ;
+	
+	
+	if (start_mode == "client")
 	{
-		std::cout << "Run as client !\n";
-		client_works2(mtx_file_path);
+		if (mtx_path == "")
+		{
+			std::cout << "Path for mtx files (arg4) is not specified.\n";
+			exit(1);
+		}	
+		if (ip_addr == "")
+		{
+			std::cout << "IP addr of server (arg4) not specified.\n";
+			exit(1);
+		}	
+		std::cout << "Run as client!\n" <<
+			"path for mtx file = '" << mtx_path << "'\n" <<
+			"Buff size = " << buff_size_kb << "kb.\n" <<
+			"Server IP = " << ip_addr << "\n";
+		client_works3(buff_size_kb * 1024, mtx_path, ip_addr);
 	}
-	else if (start_mode == 2)
+	else if (start_mode == "server")
 	{
-		std::cout << "Run as server! Buff size = " << net_buff_size_kb << "kb.\n";
-		server_works(net_buff_size_kb * 1024);
+		std::cout << "Run as server!\n" <<
+			"path for answers file = '" << mtx_path << "'\n" <<
+			"Buff size = " << buff_size_kb << "kb.\n";
+		server_works3(buff_size_kb * 1024, mtx_path);
 	}
 	else
 	{
-		std::cout << "Start mode (arg1) not specified.\n";
+		std::cout << "Start mode (arg1) not specified or incorrect.\n";
 	}
 
 	std::cout << "Main end. \n";
-	std::cin.get();
+	// std::cin.get();
 
 	return 0;
 }
