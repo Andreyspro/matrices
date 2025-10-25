@@ -4,3 +4,5 @@ bin/
 data/
 *.drawio.dtmp
 *.drawio.bkp
+build/
+bkp/
